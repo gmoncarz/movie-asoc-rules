@@ -5,6 +5,30 @@ from pyzipcode import ZipCodeDatabase
 import yaml
 import re
 
+professions = {
+    '0': 'unknown',
+    '1': 'other',
+    '2': 'academic / teacher',
+    '3': 'Artist',
+    '4': 'administrative',
+    '5': 'university/postgrade student',
+    '6': 'customer service',
+    '7': 'doctor / health care',
+    '8': 'executive',
+    '9': 'farmer',
+    '10': 'housewife',
+    '11': 'primary student',
+    '12': 'layers',
+    '13': 'coder',
+    '14': 'retired',
+    '15': 'sales / marketing',
+    '16': 'scientist',
+    '17': 'independent',
+    '18': 'tecnic / engineer',
+    '19': 'business / craftsman',
+    '20': 'unemployer',
+    '21': 'writer',
+    }
 
 class Movie:
     """ Class that represents a movie"""
@@ -25,6 +49,7 @@ class Movie:
     def getExtraInfo(self):
         """Get additiong information from IMDB"""
 
+        return
         imdbObj = imdb.IMDb()
         imdbMovieObj = imdbObj.search_movie(self.imdbName)[0]
         if imdbMovieObj['long imdb canonical title'] == self.imdbName:
@@ -40,6 +65,55 @@ class Movie:
         else:
             print("Warning: movie %s was not found on IMDB." % self.imdbName)
         
+
+
+class User:
+    """User representation class"""
+
+    def __init__(self):
+        self.id = None
+        self.sex = None     # male or female
+        """ageCat possible values:
+          * 0-17
+          * 18-24
+          * 25-34
+          * 35-44
+          * 45-49
+          * 50-55
+          * 56-inf
+        """
+        self.ageCat = None  
+        self.profession = None
+        self.postcode = None
+        self.citi = None
+        self.state = None
+
+    def fromFile(self, lst):
+        """load an user from the user.txt line"""
+        (uid, sex, age, professionCode, postcode) = lst
+
+        self.id = uid
+        self.sex = 'male' if sex[0].lower()=='m' else 'female'
+        if   age<=17: self.ageCat = '0-17'
+        elif age<=24: self.ageCat = '18-24'
+        elif age<=34: self.ageCat = '25-34'
+        elif age<=44: self.ageCat = '35-44'
+        elif age<=49: self.ageCat = '45-49'
+        elif age<=55: self.ageCat = '50-55'
+        else:         self.ageCat = '56-inf'
+
+        self.proffesion = professions[professionCode]
+        self.postcode = postcode
+    
+    def getCiti(self):
+        """ write the city and state given the postcode"""
+        if self.postcode:
+            zcdb = ZipCodeDatabase()
+            zipcode = zcdb[48067]
+            self.citi = zipcode.city
+            self.state = zipcode.state
+            
+
 
 def parse_arguments():
     """ Function that parse main command line parameters
@@ -141,6 +215,28 @@ def load_movies(filename):
     
 
 
+def load_users(filename):
+    """Return a dictionary of User objects given a movies input file"""
+
+    usersGen = read_csv_from_file(filename,  sep='::')
+    if not usersGen:
+        print("Error reading users file")
+        return None
+    
+    ret = {}
+    # Iterate over all the file
+    for line in usersGen:
+        userID = line[0]
+        if userID not in ret:
+            user = User()
+            user.fromFile(line)
+            ret[userID] = user
+
+    return ret
+ 
+
+
+
 def main():
     cmdArgs = parse_arguments()
     config = readYaml(cmdArgs.config)
@@ -153,15 +249,26 @@ def main():
 
 
     config = config[cmdArgs.section]
-    movieFile = "%s/%s" %   \
+    movieFile = "%s/%s" %  \
       (config['input']['base_path'], config['input']['movie'])
+    userFile = "%s/%s" %  \
+      (config['input']['base_path'], config['input']['user'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
 
     # get extra info from IMDB    
     get_extra_info_from_movies(moviesDict)
+
+    # Load all the users
+    usersDict = load_users(userFile)
+    # Get the citi and state
+    for user in usersDict.values():
+        user.getCiti()
     
+    
+    
+    import pdb; pdb.set_trace()
     return 0
 
 
