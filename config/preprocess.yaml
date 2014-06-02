@@ -1,0 +1,11 @@
+laptop:
+  input: 
+    base_path: /home/gabo/sources/repos/movie-asoc-rules/statement
+    movie: movies.txt
+    user: users.txt
+    tag: tags.txt
+    rating: ratings.txt
+
+
+
+# vim: set expandtab ts=2 sw=2:
