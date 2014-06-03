@@ -44,6 +44,7 @@ class Movie:
         self.cast = None
         self.genre = None
         self.imdbRating = None
+        self.rating = []
 
 
     def getExtraInfo(self):
@@ -63,8 +64,9 @@ class Movie:
             self.case = list(map((lambda x: x['name']), imdbMovieObj['cast'][:3]))
             self.ibdbRating = imdbMovieObj['rating']
         else:
-            print("Warning: movie %s was not found on IMDB." % self.imdbName)
-        
+            print("Warning: movie %s was not found on IMDB." % self.imdbName)        
+
+            
 
 
 class User:
@@ -87,6 +89,7 @@ class User:
         self.postcode = None
         self.citi = None
         self.state = None
+        self.rating = []
 
     def fromFile(self, lst):
         """load an user from the user.txt line"""
@@ -113,6 +116,16 @@ class User:
             self.citi = zipcode.city
             self.state = zipcode.state
             
+
+class Rating:
+    """Rating representation"""
+
+    def __init__(self):
+        self.userid = None
+        self.movieid = None
+        self.rating = None
+        self.timestamp = None
+
 
 
 def parse_arguments():
@@ -200,7 +213,7 @@ def load_movies(filename):
     # Iterate over all the file
     for line in moviesGen:
         (movieID, name, genres) = line
-        if name not in ret:
+        if movieID not in ret:
             # The movie is not in the dictionary. Lets add it
             # 1st Construct the Movie Obj
             movie = Movie()
@@ -209,7 +222,7 @@ def load_movies(filename):
             movie.genre = genres.split('|')
             
             # 2nd Add it to the return dict
-            ret[movie.imdbName] = movie
+            ret[movie.id] = movie
 
     return ret
     
@@ -236,6 +249,47 @@ def load_users(filename):
  
 
 
+def load_rating(filename):
+    """Return a dictionary of movies objects given a movies input file"""
+
+    ratingGen = read_csv_from_file(filename,  sep='::')
+    if not ratingGen:
+        print("Error reading rating file")
+        return None
+    
+    ret = set()
+    # Iterate over all the file
+    for line in ratingGen:
+        (userid, movieid, rating, timestamp) = line
+        ratingObj = Rating()
+        ratingObj.userid = userid
+        ratingObj.movieid = movieid
+        ratingObj.rating = rating
+        ratingObj.timestamp = timestamp
+        
+        ret.add(ratingObj)
+
+    return ret
+
+
+
+def assign_rating(ratingSet, moviesDict=None, usersDict=None):
+    """Assign rating to users or movies
+
+    Given a set of Rating object, it is assigned to a movie or user
+    dictionary
+    """
+    for ratingObj in ratingSet:
+        # Add the rating into the movies dict
+        if moviesDict and ratingObj.movieid in moviesDict:
+            moviesDict[ratingObj.movieid].rating.append(ratingObj)
+        # Add the rating into the users dict
+        if usersDict and ratingObj.userid in usersDict:
+            usersDict[ratingObj.userid].rating.append(ratingObj)
+
+    return
+
+
 
 def main():
     cmdArgs = parse_arguments()
@@ -253,10 +307,11 @@ def main():
       (config['input']['base_path'], config['input']['movie'])
     userFile = "%s/%s" %  \
       (config['input']['base_path'], config['input']['user'])
+    ratingFile = "%s/%s" %  \
+      (config['input']['base_path'], config['input']['rating'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
-
     # get extra info from IMDB    
     get_extra_info_from_movies(moviesDict)
 
@@ -265,9 +320,11 @@ def main():
     # Get the citi and state
     for user in usersDict.values():
         user.getCiti()
+
+    # Load rating
+    ratingSet = load_rating(ratingFile)
     
-    
-    
+    assign_rating(ratingSet, moviesDict, usersDict)
     import pdb; pdb.set_trace()
     return 0
 
