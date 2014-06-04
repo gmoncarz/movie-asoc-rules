@@ -4,6 +4,7 @@ import imdb
 from pyzipcode import ZipCodeDatabase
 import yaml
 import re
+import datetime
 
 professions = {
     '0': 'unknown',
@@ -29,6 +30,8 @@ professions = {
     '20': 'unemployer',
     '21': 'writer',
     }
+CAST_SIZE = 5 
+GENRE_SIZE = 3
 
 class Movie:
     """ Class that represents a movie"""
@@ -50,7 +53,7 @@ class Movie:
     def getExtraInfo(self):
         """Get additiong information from IMDB"""
 
-        return
+        #return
         imdbObj = imdb.IMDb()
         imdbMovieObj = imdbObj.search_movie(self.imdbName)[0]
         if imdbMovieObj['long imdb canonical title'] == self.imdbName:
@@ -60,9 +63,9 @@ class Movie:
             self.name = imdbMovieObj['title']
             self.year = imdbMovieObj['year']
             self.director = imdbMovieObj['director'][0]['name']
-            # Gets the main 3 actors
-            self.case = list(map((lambda x: x['name']), imdbMovieObj['cast'][:3]))
-            self.ibdbRating = imdbMovieObj['rating']
+            # Gets the main 5 actors
+            self.cast = list(map((lambda x: x['name']), imdbMovieObj['cast'][:CAST_SIZE]))
+            self.imdbRating = imdbMovieObj['rating']
         else:
             print("Warning: movie %s was not found on IMDB." % self.imdbName)        
 
@@ -105,16 +108,22 @@ class User:
         elif age<=55: self.ageCat = '50-55'
         else:         self.ageCat = '56-inf'
 
-        self.proffesion = professions[professionCode]
+        self.profession = professions[professionCode]
         self.postcode = postcode
     
     def getCiti(self):
         """ write the city and state given the postcode"""
         if self.postcode:
             zcdb = ZipCodeDatabase()
-            zipcode = zcdb[48067]
-            self.citi = zipcode.city
-            self.state = zipcode.state
+            regexp = re.compile(r'-\d*')
+            try:
+                postcode = re.sub(regexp, "", self.postcode)
+                zipcode = zcdb[postcode]
+                self.citi = zipcode.city
+                self.state = zipcode.state
+            except:
+                self.citi = "NA-citi"
+                self.state = "NA-state"
             
 
 class Rating:
@@ -289,6 +298,47 @@ def assign_rating(ratingSet, moviesDict=None, usersDict=None):
 
     return
 
+    
+
+
+def writeOutput1(filename, moviesDict, usersDict):
+
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    for movie in moviesDict.values():
+        if movie.rating:
+            # Get the cast with the full size
+            #cast = [None] * CAST_SIZE
+            #cast = map((lambda x,y: x if x else ''), movie.cast, cast)
+            #genre = [None] * GENRE_SIZE
+            #genre = map((lambda x,y: x if x else ''), movie.genre, genre)
+            cast = movie.cast[:CAST_SIZE]
+            genre = movie.genre[:GENRE_SIZE]
+            
+            fixedMovie = [movie.id, movie.name, str(movie.year), movie.director, movie.imdbRating]
+            for actor in movie.cast:
+                for genre in movie.genre:
+                    for rating in movie.rating:
+                        user = usersDict[rating.userid]
+                        fixedUser = [user.id, user.sex, user.ageCat, 
+                          user.profession, user.citi, user.state]
+                        fixedRating = [rating.rating, 
+                          datetime.datetime.fromtimestamp(int(rating.timestamp)).year]
+
+                        lst = fixedMovie[:]
+                        lst.extend([actor, genre])
+                        lst.extend(fixedUser)
+                        lst.extend(fixedRating)
+                        lst = map(str, lst)
+                        line = '|'.join(lst)
+                        fh.write(line)
+                        fh.write('\n')
+    fh.close()
+    
 
 
 def main():
@@ -309,6 +359,8 @@ def main():
       (config['input']['base_path'], config['input']['user'])
     ratingFile = "%s/%s" %  \
       (config['input']['base_path'], config['input']['rating'])
+    output1File = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['file1'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -323,9 +375,10 @@ def main():
 
     # Load rating
     ratingSet = load_rating(ratingFile)
-    
     assign_rating(ratingSet, moviesDict, usersDict)
-    import pdb; pdb.set_trace()
+    
+    writeOutput1(output1File, moviesDict, usersDict)
+
     return 0
 
 
