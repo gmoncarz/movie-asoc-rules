@@ -5,6 +5,7 @@ from pyzipcode import ZipCodeDatabase
 import yaml
 import re
 import datetime
+import shelve
 
 professions = {
     '0': 'unknown',
@@ -50,8 +51,40 @@ class Movie:
         self.rating = []
 
 
-    def getExtraInfo(self):
-        """Get additiong information from IMDB"""
+    def getExtraInfo(self, cache):
+        """Load imdb information from file or IMDB server
+
+        The function will try to read movie info from a text cache file. If 
+        the movie ain't there, it will query IMDB server and store the output
+        in the cache
+        """
+        if cache.has_key(self.id):
+            self.name = cache[self.id].name
+            self.imdbName = cache[self.id].imdbName
+            self.year = cache[self.id].year
+            self.director = cache[self.id].director
+            self.cast = cache[self.id].cast
+            self.genre = cache[self.id].genre
+            self.imdbRating = cache[self.id].imdbRating
+            self.rating = cache[self.id].rating
+        else:
+            self._queryImdb()
+            cache[self.id] = self
+        
+        return
+
+
+#    def _read(fh):
+#        """Read movie information in the cache file.
+#
+#        Function returns:
+#          * True: movie found
+#          * False: movie not found
+#        """
+        
+
+    def _queryImdb(self):
+        """Get movie information from IMDB"""
 
         #return
         imdbObj = imdb.IMDb()
@@ -200,15 +233,22 @@ def read_csv_from_file(filename, sep=",", eol="\n"):
         fh.close()
 
 
-def get_extra_info_from_movies(moviesDict):
+def get_extra_info_from_movies(moviesDict, imdbFile):
     """Get additional info from the input movies files.
 
     The input is a dictionary of Movie object.
     """
+    #fhWrite = open(imdbFile, "a")
+    #fhRead = open(imdbFile, "r")
+    cache = shelve.open(imdbFile)
     # XXX: limited to 10 rows just for testing
-    for movieObj in list(moviesDict.values())[:5]:
-        movieObj.getExtraInfo()
+    #for movieObj in list(moviesDict.values())[:5]:
+    for movieObj in list(moviesDict.values()):
+        movieObj.getExtraInfo(cache)
 
+    cache.close()
+    #fhWrite.close()
+    #fhRead.close()
 
 def load_movies(filename):
     """Return a dictionary of movies objects given a movies input file"""
@@ -310,7 +350,7 @@ def writeOutput1(filename, moviesDict, usersDict):
         return None
 
     for movie in moviesDict.values():
-        if movie.rating:
+        if movie.rating and movie.imdbRating:
             # Get the cast with the full size
             #cast = [None] * CAST_SIZE
             #cast = map((lambda x,y: x if x else ''), movie.cast, cast)
@@ -359,13 +399,15 @@ def main():
       (config['input']['base_path'], config['input']['user'])
     ratingFile = "%s/%s" %  \
       (config['input']['base_path'], config['input']['rating'])
+    imdbFile = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['imdb'])
     output1File = "%s/%s" %  \
       (config['output']['base_path'], config['output']['file1'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
     # get extra info from IMDB    
-    get_extra_info_from_movies(moviesDict)
+    get_extra_info_from_movies(moviesDict, imdbFile)
 
     # Load all the users
     usersDict = load_users(userFile)
