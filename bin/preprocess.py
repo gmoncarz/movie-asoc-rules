@@ -88,17 +88,29 @@ class Movie:
 
         #return
         imdbObj = imdb.IMDb()
-        imdbMovieObj = imdbObj.search_movie(self.imdbName)[0]
+        try:
+            imdbMovieObj = imdbObj.search_movie(self.imdbName)[0]
+        except IndexError:
+            print("Warning: movie %s was not found on IMDB." % self.imdbName)
+            return
+
         if imdbMovieObj['long imdb canonical title'] == self.imdbName:
             imdbID = imdbMovieObj.getID()
             imdbMovieObj = imdbObj.get_movie(imdbID)
 
-            self.name = imdbMovieObj['title']
-            self.year = imdbMovieObj['year']
-            self.director = imdbMovieObj['director'][0]['name']
+            if 'title' in imdbMovieObj:
+                self.name = imdbMovieObj['title']
+            if 'year' in imdbMovieObj:
+                self.year = imdbMovieObj['year']
+            if 'director' in imdbMovieObj:
+                self.director = imdbMovieObj['director'][0]['name']
             # Gets the main 5 actors
-            self.cast = list(map((lambda x: x['name']), imdbMovieObj['cast'][:CAST_SIZE]))
-            self.imdbRating = imdbMovieObj['rating']
+            if 'cast' in imdbMovieObj:
+                self.cast = list(map((lambda x: x['name']), imdbMovieObj['cast'][:CAST_SIZE]))
+            else:
+                self.Cast = None
+            if 'rating' in imdbMovieObj:
+                self.imdbRating = imdbMovieObj['rating']
         else:
             print("Warning: movie %s was not found on IMDB." % self.imdbName)        
 
