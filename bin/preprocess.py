@@ -368,12 +368,12 @@ def writeOutput1(filename, moviesDict, usersDict):
             #cast = map((lambda x,y: x if x else ''), movie.cast, cast)
             #genre = [None] * GENRE_SIZE
             #genre = map((lambda x,y: x if x else ''), movie.genre, genre)
-            cast = movie.cast[:CAST_SIZE]
-            genre = movie.genre[:GENRE_SIZE]
+            cast = movie.cast[:CAST_SIZE] if movie.cast else [None]
+            genres = movie.genre[:GENRE_SIZE] if movie.genre else [None]
             
             fixedMovie = [movie.id, movie.name, str(movie.year), movie.director, movie.imdbRating]
-            for actor in movie.cast:
-                for genre in movie.genre:
+            for actor in cast:
+                for genre in genres:
                     for rating in movie.rating:
                         user = usersDict[rating.userid]
                         fixedUser = [user.id, user.sex, user.ageCat, 
@@ -385,9 +385,9 @@ def writeOutput1(filename, moviesDict, usersDict):
                         lst.extend([actor, genre])
                         lst.extend(fixedUser)
                         lst.extend(fixedRating)
-                        lst = map(str, lst)
+                        lst = map(unicode, lst)
                         line = '|'.join(lst)
-                        fh.write(line)
+                        fh.write(line.encode('utf-8'))
                         fh.write('\n')
     fh.close()
     
