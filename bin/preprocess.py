@@ -424,7 +424,7 @@ def writeOutputLikes(filename, moviesDict, usersDict):
             
             cast = movie.cast if movie.cast else ['?']
             genres = movie.genre if movie.genre else ['?']
-            fixedMovie = ["'%s'" % movie.name, movie.yearCat, 
+            fixedMovie = ["'%s'" % movie.name, "'%s'" % movie.yearCat, 
               "'%s'" % movie.director ]
             for rating in movie.rating:
                 transid += 1
