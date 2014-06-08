@@ -427,22 +427,22 @@ def writeOutputLikes1(filename, moviesDict, usersDict):
     
 
     transid = 0
-    for movie in moviesDict.values()[:10]:
+    for movie in moviesDict.values()[:100]:
         if movie.rating and movie.imdbRating:
             
             cast = movie.cast if movie.cast else ['?']
             genres = movie.genre if movie.genre else ['?']
-            fixedMovie = ["'%s'" % movie.name, "'%s'" % movie.yearCat, 
-              "'%s'" % movie.director ]
+            fixedMovie = ['"%s"' % movie.name, '"%s"' % movie.yearCat, 
+              '"%s"' % movie.director ]
             for rating in movie.rating:
                 transid += 1
                 actor = '?'
                 genre = '?'
                 user = usersDict[rating.userid]
-                fixedUser = ["'%s'" % user.id, "'%s'" % user.sex, 
-                  "'%s'" % user.ageCat, "'%s'" % user.profession, 
-                  "'%s'" % user.citi, "'%s'" % user.state]
-                fixedRating = [ "'%s'" % rating.ratingCat]
+                fixedUser = ['"%s"' % user.id, '"%s"' % user.sex, 
+                  '"%s"' % user.ageCat, '"%s"' % user.profession, 
+                  '"%s"' % user.citi, '"%s"' % user.state]
+                fixedRating = [ '"%s"' % rating.ratingCat]
  
                 lst = [transid]
                 lst.extend(fixedMovie[:])
@@ -457,7 +457,7 @@ def writeOutputLikes1(filename, moviesDict, usersDict):
                 lstAct = ['?'] * len(lst)
                 lstAct[0] = transid
                 for actor in cast:
-                    lstAct[4] = "'%s'" % actor
+                    lstAct[4] = '"%s"' % actor
 
                     lstAct = map(unicode, lstAct)
                     line = CSV_CHAR.join(lstAct)
@@ -467,7 +467,7 @@ def writeOutputLikes1(filename, moviesDict, usersDict):
                 lstGen = ['?'] * len(lst)
                 lstGen[0] = transid
                 for genre in genres:
-                    lstGen[5] = "'%s'" % genre
+                    lstGen[5] = '"%s"' % genre
 
                     lstGen = map(unicode, lstGen)
                     line = CSV_CHAR.join(lstGen)
@@ -495,22 +495,22 @@ def writeOutputLikes2(filename, moviesDict, usersDict):
     
 
     transid = 0
-    for movie in moviesDict.values()[:10]:
+    for movie in moviesDict.values()[:100]:
         if movie.rating and movie.imdbRating:
             
             cast = movie.cast if movie.cast else ['?']
             genres = movie.genre if movie.genre else ['?']
-            fixedMovie = ["'%s'" % movie.name, "'%s'" % movie.yearCat, 
-              "'%s'" % movie.director ]
+            fixedMovie = ['"%s"' % movie.name, '"%s"' % movie.yearCat, 
+              '"%s"' % movie.director ]
             for rating in movie.rating:
                 transid += 1
                 actor = '?'
                 genre = '?'
                 user = usersDict[rating.userid]
-                fixedUser = ["'%s'" % user.id, "'%s'" % user.sex, 
-                  "'%s'" % user.ageCat, "'%s'" % user.profession, 
-                  "'%s'" % user.citi, "'%s'" % user.state]
-                fixedRating = [ "'%s'" % rating.ratingCat]
+                fixedUser = ['"%s"' % user.id, '"%s"' % user.sex, 
+                  '"%s"' % user.ageCat, '"%s"' % user.profession, 
+                  '"%s"' % user.citi, '"%s"' % user.state]
+                fixedRating = [ '"%s"' % rating.ratingCat]
  
                 lst = [transid]
                 lst.extend(fixedMovie[:])
@@ -524,7 +524,7 @@ def writeOutputLikes2(filename, moviesDict, usersDict):
                
                 lstAct = lst[:]
                 for actor in cast:
-                    lstAct[4] = "'%s'" % actor
+                    lstAct[4] = '"%s"' % actor
 
                     lstAct = map(unicode, lstAct)
                     line = CSV_CHAR.join(lstAct)
@@ -533,7 +533,7 @@ def writeOutputLikes2(filename, moviesDict, usersDict):
                     
                 lstGen = lst[:]
                 for genre in genres:
-                    lstGen[5] = "'%s'" % genre
+                    lstGen[5] = '"%s"' % genre
 
                     lstGen = map(unicode, lstGen)
                     line = CSV_CHAR.join(lstGen)
@@ -542,6 +542,56 @@ def writeOutputLikes2(filename, moviesDict, usersDict):
    
     fh.close()
  
+
+
+def writeOutputLikes3(filename, moviesDict, usersDict):
+
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'name', 'year', 'director', 'actor', 'genre', 'uid', 'sex', 'ageCat', 'prefession', 'citi', 'state', 'rating']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            
+            genres = movie.genre if movie.genre else ['?']
+            fixedMovie = ['"%s"' % movie.name, '"%s"' % movie.yearCat, 
+              '"%s"' % movie.director ]
+            for rating in movie.rating:
+                transid += 1
+                actor = movie.cast[0] if movie.cast else ['?']
+                user = usersDict[rating.userid]
+                fixedUser = ['"%s"' % user.id, '"%s"' % user.sex, 
+                  '"%s"' % user.ageCat, '"%s"' % user.profession, 
+                  '"%s"' % user.citi, '"%s"' % user.state]
+                fixedRating = [ '"%s"' % rating.ratingCat]
+    
+                for genre in genres:
+ 
+                    lst = [transid]
+                    lst.extend(fixedMovie[:])
+                    lst.extend(['"%s"' % actor, '"%s"' % genre])
+                    lst.extend(fixedUser)
+                    lst.extend(fixedRating)
+                    lst = map(unicode, lst)
+                    line = CSV_CHAR.join(lst)
+                    fh.write(line.encode('utf-8'))
+                    fh.write('\n')
+               
+    fh.close()
+
+
+
 
 def main():
     cmdArgs = parse_arguments()
@@ -569,6 +619,8 @@ def main():
       (config['output']['base_path'], config['output']['fileLike1'])
     outputFileLike2 = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLike2'])
+    outputFileLike3 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike3'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -585,9 +637,9 @@ def main():
     ratingSet = load_rating(ratingFile)
     assign_rating(ratingSet, moviesDict, usersDict)
 
-    #writeOutput1(output1File, moviesDict, usersDict)
     writeOutputLikes1(outputFileLike1, moviesDict, usersDict)
     writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
+    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
 
     return 0
 
