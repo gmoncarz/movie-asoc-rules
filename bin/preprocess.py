@@ -186,8 +186,15 @@ class Rating:
         self.userid = None
         self.movieid = None
         self.rating = None
+        self.ratingCat = None
         self.timestamp = None
 
+    def categorize(self):
+        if self.rating:
+            rating = int(self.rating)
+            if rating<=2: self.ratingCat = 'low'
+            if rating==3: self.ratingCat = 'medium'
+            if rating>=4: self.ratingCat = 'high'
 
 
 def parse_arguments():
@@ -336,6 +343,7 @@ def load_rating(filename):
         ratingObj.movieid = movieid
         ratingObj.rating = rating
         ratingObj.timestamp = timestamp
+        ratingObj.categorize()
         
         ret.add(ratingObj)
 
@@ -434,7 +442,7 @@ def writeOutputLikes(filename, moviesDict, usersDict):
                 fixedUser = ["'%s'" % user.id, "'%s'" % user.sex, 
                   "'%s'" % user.ageCat, "'%s'" % user.profession, 
                   "'%s'" % user.citi, "'%s'" % user.state]
-                fixedRating = [rating.rating]
+                fixedRating = [ "'%s'" % rating.ratingCat]
  
                 lst = [transid]
                 lst.extend(fixedMovie[:])
