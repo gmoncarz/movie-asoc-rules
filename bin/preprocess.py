@@ -390,6 +390,71 @@ def writeOutput1(filename, moviesDict, usersDict):
                         fh.write(line.encode('utf-8'))
                         fh.write('\n')
     fh.close()
+
+
+
+def writeOutputLikes(filename, moviesDict, usersDict):
+
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'movieid', 'name', 'year', 'director', 'actor', 'genre', 'uid', 'sex', 'ageCat', 'prefession', 'citi', 'state', 'rating']
+    line = '|'.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            
+            cast = movie.cast if movie.cast else [None]
+            genres = movie.genre if movie.genre else [None]
+            fixedMovie = [movie.id, movie.name, str(movie.year), movie.director]
+            for rating in movie.rating:
+                transid += 1
+                actor = None
+                genre = None
+                user = usersDict[rating.userid]
+                fixedUser = [user.id, user.sex, user.ageCat,
+                          user.profession, user.citi, user.state]
+                fixedRating = [rating.rating]
+ 
+                lst = [transid]
+                lst.extend(fixedMovie[:])
+                lst.extend([actor, genre])
+                lst.extend(fixedUser)
+                lst.extend(fixedRating)
+                lst = map(unicode, lst)
+                line = '|'.join(lst)
+                fh.write(line.encode('utf-8'))
+                fh.write('\n')
+               
+                lstAct = [None] * len(lst)
+                lstAct[0] = transid
+                for actor in cast:
+                    lstAct[5] = actor
+
+                    lstAct = map(unicode, lstAct)
+                    line = '|'.join(lstAct)
+                    fh.write(line.encode('utf-8'))
+                    fh.write('\n')
+                    
+                lstGen = [None] * len(lst)
+                lstGen[0] = transid
+                for genre in genres:
+                    lstGen[6] = genre
+
+                    lstGen = map(unicode, lstGen)
+                    line = '|'.join(lstGen)
+                    fh.write(line.encode('utf-8'))
+                    fh.write('\n')
+   
+    fh.close()
     
 
 
@@ -415,6 +480,8 @@ def main():
       (config['output']['base_path'], config['output']['imdb'])
     output1File = "%s/%s" %  \
       (config['output']['base_path'], config['output']['file1'])
+    outputFileLike = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -431,7 +498,8 @@ def main():
     ratingSet = load_rating(ratingFile)
     assign_rating(ratingSet, moviesDict, usersDict)
     
-    writeOutput1(output1File, moviesDict, usersDict)
+    #writeOutput1(output1File, moviesDict, usersDict)
+    writeOutputLikes(outputFileLike, moviesDict, usersDict)
 
     return 0
 
