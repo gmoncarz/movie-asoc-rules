@@ -395,6 +395,7 @@ def writeOutput1(filename, moviesDict, usersDict):
 
 def writeOutputLikes(filename, moviesDict, usersDict):
 
+    CSV_CHAR = ','
     # Open the File
     try:
         fh = open(filename, 'w')
@@ -402,26 +403,28 @@ def writeOutputLikes(filename, moviesDict, usersDict):
         return None
 
     # Write the header
-    header = ['tid', 'movieid', 'name', 'year', 'director', 'actor', 'genre', 'uid', 'sex', 'ageCat', 'prefession', 'citi', 'state', 'rating']
-    line = '|'.join(header)
+    header = ['tid', 'name', 'year', 'director', 'actor', 'genre', 'uid', 'sex', 'ageCat', 'prefession', 'citi', 'state', 'rating']
+    line = CSV_CHAR.join(header)
     fh.write(line.encode('utf-8'))
     fh.write('\n')
     
 
     transid = 0
-    for movie in moviesDict.values():
+    for movie in moviesDict.values()[:10]:
         if movie.rating and movie.imdbRating:
             
             cast = movie.cast if movie.cast else [None]
             genres = movie.genre if movie.genre else [None]
-            fixedMovie = [movie.id, movie.name, str(movie.year), movie.director]
+            fixedMovie = ["'%s'" % movie.name, str(movie.year), 
+              "'%s'" % movie.director ]
             for rating in movie.rating:
                 transid += 1
                 actor = None
                 genre = None
                 user = usersDict[rating.userid]
-                fixedUser = [user.id, user.sex, user.ageCat,
-                          user.profession, user.citi, user.state]
+                fixedUser = ["'%s'" % user.id, "'%s'" % user.sex, 
+                  "'%s'" % user.ageCat, "'%s'" % user.profession, 
+                  "'%s'" % user.citi, "'%s'" % user.state]
                 fixedRating = [rating.rating]
  
                 lst = [transid]
@@ -430,27 +433,27 @@ def writeOutputLikes(filename, moviesDict, usersDict):
                 lst.extend(fixedUser)
                 lst.extend(fixedRating)
                 lst = map(unicode, lst)
-                line = '|'.join(lst)
+                line = CSV_CHAR.join(lst)
                 fh.write(line.encode('utf-8'))
                 fh.write('\n')
                
                 lstAct = [None] * len(lst)
                 lstAct[0] = transid
                 for actor in cast:
-                    lstAct[5] = actor
+                    lstAct[4] = "'%s'" % actor
 
                     lstAct = map(unicode, lstAct)
-                    line = '|'.join(lstAct)
+                    line = CSV_CHAR.join(lstAct)
                     fh.write(line.encode('utf-8'))
                     fh.write('\n')
                     
                 lstGen = [None] * len(lst)
                 lstGen[0] = transid
                 for genre in genres:
-                    lstGen[6] = genre
+                    lstGen[5] = "'%s'" % genre
 
                     lstGen = map(unicode, lstGen)
-                    line = '|'.join(lstGen)
+                    line = CSV_CHAR.join(lstGen)
                     fh.write(line.encode('utf-8'))
                     fh.write('\n')
    
