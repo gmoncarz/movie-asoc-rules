@@ -44,6 +44,7 @@ class Movie:
         self.name = None
         self.imdbName = None
         self.year = None
+        self.yearCat = None
         self.director = None
         self.cast = None
         self.genre = None
@@ -72,6 +73,12 @@ class Movie:
             cache[self.id] = self
         
         return
+        
+
+    def categorize(self):
+        """Categorize some field related to movies"""
+        if self.year:
+            self.yearCat = unicode(self.year)[:-1] + u'0'
 
 
 #    def _read(fh):
@@ -258,6 +265,7 @@ def get_extra_info_from_movies(moviesDict, imdbFile):
     #for movieObj in list(moviesDict.values())[:5]:
     for movieObj in list(moviesDict.values()):
         movieObj.getExtraInfo(cache)
+        movieObj.categorize()
 
     cache.close()
     #fhWrite.close()
@@ -416,7 +424,7 @@ def writeOutputLikes(filename, moviesDict, usersDict):
             
             cast = movie.cast if movie.cast else ['?']
             genres = movie.genre if movie.genre else ['?']
-            fixedMovie = ["'%s'" % movie.name, str(movie.year), 
+            fixedMovie = ["'%s'" % movie.name, movie.yearCat, 
               "'%s'" % movie.director ]
             for rating in movie.rating:
                 transid += 1
@@ -501,7 +509,7 @@ def main():
     # Load rating
     ratingSet = load_rating(ratingFile)
     assign_rating(ratingSet, moviesDict, usersDict)
-    
+
     #writeOutput1(output1File, moviesDict, usersDict)
     writeOutputLikes(outputFileLike, moviesDict, usersDict)
 
