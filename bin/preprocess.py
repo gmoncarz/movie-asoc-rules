@@ -142,6 +142,7 @@ class User:
     def fromFile(self, lst):
         """load an user from the user.txt line"""
         (uid, sex, age, professionCode, postcode) = lst
+        age = int(age)
 
         self.id = uid
         self.sex = 'male' if sex[0].lower()=='m' else 'female'
@@ -413,14 +414,14 @@ def writeOutputLikes(filename, moviesDict, usersDict):
     for movie in moviesDict.values()[:10]:
         if movie.rating and movie.imdbRating:
             
-            cast = movie.cast if movie.cast else [None]
-            genres = movie.genre if movie.genre else [None]
+            cast = movie.cast if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
             fixedMovie = ["'%s'" % movie.name, str(movie.year), 
               "'%s'" % movie.director ]
             for rating in movie.rating:
                 transid += 1
-                actor = None
-                genre = None
+                actor = '?'
+                genre = '?'
                 user = usersDict[rating.userid]
                 fixedUser = ["'%s'" % user.id, "'%s'" % user.sex, 
                   "'%s'" % user.ageCat, "'%s'" % user.profession, 
@@ -437,7 +438,7 @@ def writeOutputLikes(filename, moviesDict, usersDict):
                 fh.write(line.encode('utf-8'))
                 fh.write('\n')
                
-                lstAct = [None] * len(lst)
+                lstAct = ['?'] * len(lst)
                 lstAct[0] = transid
                 for actor in cast:
                     lstAct[4] = "'%s'" % actor
@@ -447,7 +448,7 @@ def writeOutputLikes(filename, moviesDict, usersDict):
                     fh.write(line.encode('utf-8'))
                     fh.write('\n')
                     
-                lstGen = [None] * len(lst)
+                lstGen = ['?'] * len(lst)
                 lstGen[0] = transid
                 for genre in genres:
                     lstGen[5] = "'%s'" % genre
