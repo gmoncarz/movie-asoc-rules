@@ -305,6 +305,16 @@ def load_movies(filename):
     
 
 
+def getGenreList(moviesDict):
+    genres = []
+    for movie in moviesDict.values():
+        if movie.genre:
+            for genre in movie.genre:
+                if not genre in genres:
+                    genres.append(genre)
+
+    return genres
+
 def load_users(filename):
     """Return a dictionary of User objects given a movies input file"""
 
@@ -592,6 +602,95 @@ def writeOutputLikes3(filename, moviesDict, usersDict):
 
 
 
+def writeOutputLikes4(filename, moviesDict, usersDict, genreList):
+
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['name', 'year', 'director', 'actor', 'uid', 'sex', 'ageCat', 'prefession', 'citi', 'state', 'rating']
+    genreHeader = list(map((lambda x: "genre_" + re.sub("'",'',x)), genreList[:]))
+    header.extend(genreHeader)
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            
+            genres = movie.genre if movie.genre else ['?']
+            fixedMovie = ['"%s"' % movie.name, '"%s"' % movie.yearCat, 
+              '"%s"' % movie.director ]
+            for rating in movie.rating:
+                actor = movie.cast[0] if movie.cast else ['?']
+                user = usersDict[rating.userid]
+                fixedUser = ['"%s"' % user.id, '"%s"' % user.sex, 
+                  '"%s"' % user.ageCat, '"%s"' % user.profession, 
+                  '"%s"' % user.citi, '"%s"' % user.state]
+                fixedRating = [ '"%s"' % rating.ratingCat]
+
+                genreDummy = map((lambda x: 'True' if x in movie.genre else '?'), genreList)
+    
+                lst = fixedMovie[:]
+                lst.extend(['"%s"' % actor])
+                lst.extend(fixedUser)
+                lst.extend(fixedRating)
+                lst.extend(genreDummy)
+                lst = map(unicode, lst)
+                line = CSV_CHAR.join(lst)
+                fh.write(line.encode('utf-8'))
+                fh.write('\n')
+               
+    fh.close()
+
+
+
+def writeOutputLikes5(filename, moviesDict, usersDict):
+
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            
+            cast = movie.cast if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
+            fixedMovie = [movie.name, movie.yearCat, movie.director ]
+            for rating in movie.rating:
+                transid += 1
+                user = usersDict[rating.userid]
+                fixedUser = [user.id, user.sex, user.ageCat, user.profession, 
+                  user.citi, user.state]
+                fixedRating = [ rating.ratingCat]
+ 
+                lst = fixedMovie[:]
+                lst.extend(fixedUser)
+                lst.extend(fixedRating)
+                lst.extend(cast)
+                lst.extend(genres)
+                lst = map(unicode, lst)
+                for item in lst:
+                    fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
 
 def main():
     cmdArgs = parse_arguments()
@@ -621,11 +720,18 @@ def main():
       (config['output']['base_path'], config['output']['fileLike2'])
     outputFileLike3 = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLike3'])
+    outputFileLike4 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike4'])
+    outputFileLike5 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike5'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
     # get extra info from IMDB    
     get_extra_info_from_movies(moviesDict, imdbFile)
+
+#    # Get the genre list
+#    genreList = getGenreList(moviesDict)
 
     # Load all the users
     usersDict = load_users(userFile)
@@ -637,9 +743,11 @@ def main():
     ratingSet = load_rating(ratingFile)
     assign_rating(ratingSet, moviesDict, usersDict)
 
-    writeOutputLikes1(outputFileLike1, moviesDict, usersDict)
-    writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
-    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
+#    writeOutputLikes1(outputFileLike1, moviesDict, usersDict)
+#    writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
+#    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
+#    writeOutputLikes4(outputFileLike4, moviesDict, usersDict, genreList)
+    writeOutputLikes5(outputFileLike5, moviesDict, usersDict)
 
     return 0
 
