@@ -650,8 +650,10 @@ def writeOutputLikes4(filename, moviesDict, usersDict, genreList):
 
 
 
-def writeOutputLikes5(filename, moviesDict, usersDict):
+def writeTransActorDirectors(filename, moviesDict, usersDict):
+    """Write a transaction file ready to be process by R.
 
+    It will write all the processed items on the target"""
     CSV_CHAR = ','
     # Open the File
     try:
@@ -692,6 +694,144 @@ def writeOutputLikes5(filename, moviesDict, usersDict):
     fh.close()
 
 
+
+def writeOutputLikes5(filename, moviesDict, usersDict):
+    """Write a transaction file ready to be process by R.
+
+    It will write all the processed items on the target"""
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            
+            cast = movie.cast if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
+            fixedMovie = [movie.name, movie.yearCat, movie.director ]
+            for rating in movie.rating:
+                transid += 1
+                user = usersDict[rating.userid]
+                fixedUser = [user.id, user.sex, user.ageCat, user.profession, 
+                  user.citi, user.state]
+                fixedRating = [ rating.ratingCat]
+ 
+                lst = fixedMovie[:]
+                lst.extend(fixedUser)
+                lst.extend(fixedRating)
+                lst.extend(cast)
+                lst.extend(genres)
+                lst = map(unicode, lst)
+                for item in lst:
+                    fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
+    """Write a transaction file ready to be process by R.
+
+    The file will write """
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            cast = map((lambda x: "actor_" + x), movie.cast) if movie.cast else ['?']
+            
+            if movie.director:
+                fixedMovie = [movie.name, "director_" + movie.director ]
+            else:
+                fixedMovie = [movie.name]
+            
+            for rating in movie.rating:
+                if rating.ratingCat == ranking:
+                    transid += 1
+                    user = usersDict[rating.userid]
+                    fixedUser = [user.ageCat, "prof_" + user.profession]
+                    fixedRating = [ rating.ratingCat ]
+     
+                    lst = fixedMovie[:]
+                    lst.extend(fixedUser)
+                    #lst.extend(fixedRating)
+                    lst.extend(cast)
+                    #lst.extend(genres)
+                    lst = map(unicode, lst)
+                    for item in lst:
+                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+def writeTransDirectors(filename, moviesDict, usersDict, ranking="high"):
+    """Write a transaction file ready to be process by R.
+
+    The file will write """
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            if movie.director:
+                fixedMovie = [movie.name, "director_" + movie.director]
+            else:
+                fixedMovie = [movie.name]
+
+            for rating in movie.rating:
+                if rating.ratingCat == ranking:
+                    transid += 1
+                    user = usersDict[rating.userid]
+                    fixedUser = [user.ageCat, "prof_" + user.profession]
+                    fixedRating = [ rating.ratingCat ]
+     
+                    lst = fixedMovie[:]
+                    lst.extend(fixedUser)
+                    #lst.extend(fixedRating)
+                    #lst.extend(genres)
+                    lst = map(unicode, lst)
+                    for item in lst:
+                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+
+
+
+
 def main():
     cmdArgs = parse_arguments()
     config = readYaml(cmdArgs.config)
@@ -724,6 +864,14 @@ def main():
       (config['output']['base_path'], config['output']['fileLike4'])
     outputFileLike5 = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLike5'])
+    outputFileLike6 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike6'])
+    outputFileLike7 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike7'])
+    outputFileLike8 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike8'])
+    outputFileLike9 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike9'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -747,7 +895,12 @@ def main():
 #    writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
 #    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
 #    writeOutputLikes4(outputFileLike4, moviesDict, usersDict, genreList)
-    writeOutputLikes5(outputFileLike5, moviesDict, usersDict)
+#    writeOutputLikes5(outputFileLike5, moviesDict, usersDict)
+    writeTransActorsDirectors(outputFileLike6, moviesDict, usersDict, ranking="high")
+    writeTransDirectors(outputFileLike7, moviesDict, usersDict, ranking="high")
+    writeTransActorsDirectors(outputFileLike8, moviesDict, usersDict, ranking="low")
+    writeTransDirectors(outputFileLike9, moviesDict, usersDict, ranking="low")
+    
 
     return 0
 
