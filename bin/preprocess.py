@@ -739,7 +739,8 @@ def writeOutputLikes5(filename, moviesDict, usersDict):
     fh.close()
 
 
-def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high", writeGenre=False):
+def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high", 
+  writeGenre=False, ratingYear=None):
     """Write a transaction file ready to be process by R.
 
     The file will write """
@@ -769,21 +770,23 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high", w
             
             for rating in movie.rating:
                 if ranking == None or rating.ratingCat == ranking:
-                    transid += 1
-                    user = usersDict[rating.userid]
-                    fixedUser = [user.ageCat, "prof_" + user.profession]
-                    fixedRating = [ rating.ratingCat ]
+                    currentRatingYear = datetime.datetime.fromtimestamp(int(rating.timestamp)).strftime('%Y')
+                    if ratingYear==None or str(ratingYear)==currentRatingYear:
+                        transid += 1
+                        user = usersDict[rating.userid]
+                        fixedUser = [user.ageCat, "prof_" + user.profession]
+                        fixedRating = [ rating.ratingCat ]
      
-                    lst = fixedMovie[:]
-                    lst.extend(fixedUser)
-                    if ranking == None:
-                        lst.extend(fixedRating)
-                    lst.extend(cast)
-                    if writeGenre:
-                        lst.extend(map((lambda x: "genre_" + x), genres))
-                    lst = map(unicode, lst)
-                    for item in lst:
-                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+                        lst = fixedMovie[:]
+                        lst.extend(fixedUser)
+                        if ranking == None:
+                            lst.extend(fixedRating)
+                        lst.extend(cast)
+                        if writeGenre:
+                            lst.extend(map((lambda x: "genre_" + x), genres))
+                        lst = map(unicode, lst)
+                        for item in lst:
+                            fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
 
     fh.close()
 
@@ -985,6 +988,10 @@ def main():
       (config['output']['base_path'], config['output']['fileLocationCitiGenre'])
     outputLocationStateGenre = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLocationStateGenre'])
+    outputFileLike2000 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike2000'])
+    outputFileLike2001 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike2001'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -1025,10 +1032,14 @@ def main():
 #      ranking=None, citi=True, state=False, director=False )
 #    writeLocationMovie(outputLocationStateMovie, moviesDict, usersDict, 
 #      ranking=None, citi=False, state=True, director=True )
-    writeLocationGenre(outputLocationCitiGenre, moviesDict, usersDict, 
-      ranking=None, citi=True, state=False, director=False )
-    writeLocationGenre(outputLocationStateGenre, moviesDict, usersDict, 
-      ranking=None, citi=False, state=True, director=False )
+#    writeLocationGenre(outputLocationCitiGenre, moviesDict, usersDict, 
+#      ranking=None, citi=True, state=False, director=False )
+#    writeLocationGenre(outputLocationStateGenre, moviesDict, usersDict, 
+#      ranking=None, citi=False, state=True, director=False )
+    writeTransActorsDirectors(outputFileLike2000, moviesDict, usersDict, 
+      ranking=None, writeGenre=False, ratingYear=2000)
+    writeTransActorsDirectors(outputFileLike2001, moviesDict, usersDict, 
+      ranking=None, writeGenre=False, ratingYear=2001)
     
 
     return 0
