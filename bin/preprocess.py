@@ -437,7 +437,7 @@ def writeOutputLikes1(filename, moviesDict, usersDict):
     
 
     transid = 0
-    for movie in moviesDict.values()[:100]:
+    for movie in moviesDict.values():
         if movie.rating and movie.imdbRating:
             
             cast = movie.cast if movie.cast else ['?']
@@ -505,7 +505,7 @@ def writeOutputLikes2(filename, moviesDict, usersDict):
     
 
     transid = 0
-    for movie in moviesDict.values()[:100]:
+    for movie in moviesDict.values():
         if movie.rating and movie.imdbRating:
             
             cast = movie.cast if movie.cast else ['?']
@@ -739,7 +739,7 @@ def writeOutputLikes5(filename, moviesDict, usersDict):
     fh.close()
 
 
-def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
+def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high", writeGenre=False):
     """Write a transaction file ready to be process by R.
 
     The file will write """
@@ -760,6 +760,7 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
     for movie in moviesDict.values():
         if movie.rating and movie.imdbRating:
             cast = map((lambda x: "actor_" + x), movie.cast) if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
             
             if movie.director:
                 fixedMovie = [movie.name, "director_" + movie.director ]
@@ -767,7 +768,7 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
                 fixedMovie = [movie.name]
             
             for rating in movie.rating:
-                if rating.ratingCat == ranking:
+                if ranking == None or rating.ratingCat == ranking:
                     transid += 1
                     user = usersDict[rating.userid]
                     fixedUser = [user.ageCat, "prof_" + user.profession]
@@ -775,9 +776,11 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
      
                     lst = fixedMovie[:]
                     lst.extend(fixedUser)
-                    #lst.extend(fixedRating)
+                    if ranking == None:
+                        lst.extend(fixedRating)
                     lst.extend(cast)
-                    #lst.extend(genres)
+                    if writeGenre:
+                        lst.extend(map((lambda x: "genre_" + x), genres))
                     lst = map(unicode, lst)
                     for item in lst:
                         fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
@@ -785,7 +788,7 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high"):
     fh.close()
 
 
-def writeTransDirectors(filename, moviesDict, usersDict, ranking="high"):
+def writeTransDirectors(filename, moviesDict, usersDict, ranking="high", writeGenre=False):
     """Write a transaction file ready to be process by R.
 
     The file will write """
@@ -805,13 +808,14 @@ def writeTransDirectors(filename, moviesDict, usersDict, ranking="high"):
     transid = 0
     for movie in moviesDict.values():
         if movie.rating and movie.imdbRating:
+            genres = movie.genre if movie.genre else ['?']
             if movie.director:
                 fixedMovie = [movie.name, "director_" + movie.director]
             else:
                 fixedMovie = [movie.name]
 
             for rating in movie.rating:
-                if rating.ratingCat == ranking:
+                if ranking == None or rating.ratingCat == ranking:
                     transid += 1
                     user = usersDict[rating.userid]
                     fixedUser = [user.ageCat, "prof_" + user.profession]
@@ -819,8 +823,101 @@ def writeTransDirectors(filename, moviesDict, usersDict, ranking="high"):
      
                     lst = fixedMovie[:]
                     lst.extend(fixedUser)
-                    #lst.extend(fixedRating)
-                    #lst.extend(genres)
+                    if ranking == None: 
+                        lst.extend(fixedRating)
+                    if writeGenre:
+                        lst.extend(genres)
+                    lst = map(unicode, lst)
+                    for item in lst:
+                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+
+def writeLocationMovie(filename, moviesDict, usersDict, ranking="high", citi=True, state=True, director=True):
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            genres = movie.genre if movie.genre else ['?']
+            if movie.director and director:
+                fixedMovie = [movie.name, "director_" + movie.director]
+            else:
+                fixedMovie = [movie.name]
+
+            for rating in movie.rating:
+                if ranking == None or rating.ratingCat == ranking:
+                    transid += 1
+                    user = usersDict[rating.userid]
+                    fixedUser = []
+                    if citi:    fixedUser.append(user.citi)
+                    if state:   fixedUser.append(user.state)
+                    fixedRating = [ rating.ratingCat ]
+     
+                    lst = fixedMovie[:]
+                    lst.extend(fixedUser)
+                    if ranking == None: 
+                        lst.extend(fixedRating)
+#                    if writeGenre:
+#                        lst.extend(genres)
+                    lst = map(unicode, lst)
+                    for item in lst:
+                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+
+def writeLocationGenre(filename, moviesDict, usersDict, ranking="high", citi=True, state=True, director=True):
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            genres = movie.genre if movie.genre else ['?']
+            if movie.director and director:
+                fixedMovie = [movie.name, "director_" + movie.director]
+            else:
+                fixedMovie = [movie.name]
+
+            for rating in movie.rating:
+                if ranking == None or rating.ratingCat == ranking:
+                    transid += 1
+                    user = usersDict[rating.userid]
+                    fixedUser = []
+                    if citi:    fixedUser.append(user.citi)
+                    if state:   fixedUser.append(user.state)
+                    fixedRating = [ rating.ratingCat ]
+     
+                    lst = fixedMovie[:]
+                    lst.extend(fixedUser)
+                    if ranking == None: 
+                        lst.extend(fixedRating)
+                    lst.extend(genres)
                     lst = map(unicode, lst)
                     for item in lst:
                         fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
@@ -872,6 +969,22 @@ def main():
       (config['output']['base_path'], config['output']['fileLike8'])
     outputFileLike9 = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLike9'])
+    outputFileLike10 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike10'])
+    outputFileLike11 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike11'])
+    outputFileLike12 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike12'])
+    outputFileLike13 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike13'])
+    outputLocationCitiMovie = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLocationCitiMovie'])
+    outputLocationStateMovie = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLocationStateMovie'])
+    outputLocationCitiGenre = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLocationCitiGenre'])
+    outputLocationStateGenre = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLocationStateGenre'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -891,15 +1004,31 @@ def main():
     ratingSet = load_rating(ratingFile)
     assign_rating(ratingSet, moviesDict, usersDict)
 
-#    writeOutputLikes1(outputFileLike1, moviesDict, usersDict)
-#    writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
-#    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
-#    writeOutputLikes4(outputFileLike4, moviesDict, usersDict, genreList)
-#    writeOutputLikes5(outputFileLike5, moviesDict, usersDict)
-    writeTransActorsDirectors(outputFileLike6, moviesDict, usersDict, ranking="high")
-    writeTransDirectors(outputFileLike7, moviesDict, usersDict, ranking="high")
-    writeTransActorsDirectors(outputFileLike8, moviesDict, usersDict, ranking="low")
-    writeTransDirectors(outputFileLike9, moviesDict, usersDict, ranking="low")
+##    writeOutputLikes1(outputFileLike1, moviesDict, usersDict)
+##    writeOutputLikes2(outputFileLike2, moviesDict, usersDict)
+##    writeOutputLikes3(outputFileLike3, moviesDict, usersDict)
+##    writeOutputLikes4(outputFileLike4, moviesDict, usersDict, genreList)
+##    writeOutputLikes5(outputFileLike5, moviesDict, usersDict)
+##    writeTransActorsDirectors(outputFileLike6, moviesDict, usersDict, ranking="high")
+##    writeTransDirectors(outputFileLike7, moviesDict, usersDict, ranking="high")
+##    writeTransActorsDirectors(outputFileLike8, moviesDict, usersDict, ranking="low")
+##    writeTransDirectors(outputFileLike9, moviesDict, usersDict, ranking="low")
+#    writeTransActorsDirectors(outputFileLike10, moviesDict, usersDict, 
+#      ranking=None, writeGenre=True)
+#    writeTransActorsDirectors(outputFileLike11, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False)
+#    writeTransDirectors(outputFileLike12, moviesDict, usersDict, 
+#      ranking=None, writeGenre=True)
+#    writeTransDirectors(outputFileLike13, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False)
+#    writeLocationMovie(outputLocationCitiMovie, moviesDict, usersDict, 
+#      ranking=None, citi=True, state=False, director=False )
+#    writeLocationMovie(outputLocationStateMovie, moviesDict, usersDict, 
+#      ranking=None, citi=False, state=True, director=True )
+    writeLocationGenre(outputLocationCitiGenre, moviesDict, usersDict, 
+      ranking=None, citi=True, state=False, director=False )
+    writeLocationGenre(outputLocationStateGenre, moviesDict, usersDict, 
+      ranking=None, citi=False, state=True, director=False )
     
 
     return 0

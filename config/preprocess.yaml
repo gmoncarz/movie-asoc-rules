@@ -2,6 +2,7 @@ laptop:
   input: 
     base_path: /home/gabo/sources/repos/movie-asoc-rules/statement
     movie: movies.txt
+    #movie: movies2.txt
     user: users.txt
     tag: tags.txt
     rating: ratings.txt
@@ -10,6 +11,25 @@ laptop:
     base_path: /home/gabo/tmp/dm/
     imdb: imdb_cache.dat
     file1: file4.out
+    fileLike1: fileLikes1.csv
+    fileLike2: fileLikes2.csv
+    fileLike3: fileLikes3.csv
+    fileLike4: fileLikes4.csv
+    fileLike5: fileLikes5.csv
+    fileLike6: movies_actors_directorsLike.csv
+    fileLike7: movies_directorsLike.csv
+    fileLike8: movies_actors_directorsDislike.csv
+    fileLike9: movies_directorsDislike.csv
+    fileLike10: movies_actors_directors_genre_ranking.csv
+    fileLike11: movies_actors_directors_ranking.csv
+    fileLike12: movies_directors_genre_ranking.csv
+    fileLike13: movies_directors_ranking.csv
+    
+
+    fileLocationCitiMovie: locationCitiMovie.csv
+    fileLocationStateMovie: locationStateMovie.csv
+    fileLocationCitiGenre: locationCitiGenre.csv
+    fileLocationStateGenre: locationStateGenre.csv
 
 
 # vim: set expandtab ts=2 sw=2:
