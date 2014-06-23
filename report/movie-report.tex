@@ -1,0 +1,657 @@
+%\documentclass[12pt]{article}
+\documentclass[journal]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+
+\begin{document}
+
+\title{Trabajo Práctico Final de Reglas de Asociacion}
+\author{
+	Keuroghlanian, Alejo \\
+	\and
+	Krauthamer, Diego \\
+	\and
+	Moncarz, Gabriel}
+\maketitle % this produces the title block
+
+\begin{abstract}
+TO BE DONE
+\end{abstract}
+
+\begin{IEEEkeywords}
+Minería de datos
+Reglas de asociación
+Peliculas
+\end{IEEEkeywords}
+
+\section{INTRODUCUCCIÓN}
+
+TO BE DONE
+
+
+
+
+
+\section{Datos}
+En la presente sección se analiza losdatos originales, como fueron enriquesidos,
+como se los ha manipulado y las transformaciones realizadas. También se explica como
+todo el procesamiento se ha automatizado con intenciones de que este mismo análisis 
+pueda realizarse en caso de tener tanto datasets distintos, como se desee incorporar
+nuevas entradas a los datos existentes.
+
+\subsection{Fuente de datos}
+El punto de partida del presente trabajo son  archivos relacionados con la información
+sobre pelícuas y rating de películas. Los archivos en cuestión son 3
+\begin{itemize}
+	\item Peliculas: contiene 3.883 películas a ser analizadas. La información sobre cada
+		una de ellas es:
+		\begin{itemize}
+			\item Código de película
+			\item Nombre de la película
+			\item Lista de géneros a la que pertenece
+				\begin{lstlisting}[frame=single]
+1::Toy Story (1995)::Animation
+            |Children's|Comedy
+2::Jumanji (1995)::Adventure
+           |Children's|Fantasy
+3::Grumpier Old Men (1995)
+              ::Comedy|Romance
+4::Waiting to Exhale (1995)
+              ::Comedy|Drama
+5::Father of the Bride Part II 
+              (1995)::Comedy
+				\end{lstlisting}
+		\end{itemize}
+
+
+	\item Usuarios: contiene 6.040 registros de usuarios distintos. La información de cada
+		fila es
+		\begin{itemize}
+			\item código de usuario
+			\item sexo (masculino o femenino)
+			\item rango de edad
+			\item ocupación o profesion
+			\item código postal del usuario\footnote{Todos los usuarios analizados residen 
+			  en los Estados Unidos}
+				\begin{lstlisting}[frame=single]
+1::F::1::10::48067
+2::M::56::16::70072
+3::M::25::15::55117
+4::M::45::7::02460
+5::M::25::20::55455
+				\end{lstlisting}
+		\end{itemize}
+
+	\item Rating: raring de distintos usuarios sobre diversas películas.\footnote{Cabe
+		destacar que cada usuario da su calificación sobre las películas que él desea. El
+		usuario no esta obligado a completar una cantidad mínima de calificaciones.}
+
+		\begin{itemize}
+			\item Usuario que realiza la evaluación
+			\item Pelicula evaluada
+			\item Rating/evaluación asignada
+			\item tiempo: momento en que es evaluada
+
+        \begin{lstlisting}[frame=single]
+1::1193::5::978300760
+1::661::3::978302109
+2::3108::3::978299712
+2::3035::4::978298625
+5::3081::3::978243054
+5::377::4::978245999
+        \end{lstlisting}
+    \end{itemize}
+
+\end{itemize}
+
+Estos 3 archivos son, en resumen, los datos crudos utilizados. 
+Todo el tratamiento de datos posterior, enriquesimiento de información como los
+análisis y conclusiones finales, estan basados en el contenido de estos 3 archivos
+fuentes.
+
+\subsection{Preprocesamiento}
+TO BE DONE
+\subsection{Discretización de datos}
+TO BE DONE
+\subsection{Obtención de datos externos}
+TO BE DONE
+TODO: hablar del cache de peliculas
+\subsection{Proceso de automatización}
+TO BE DONE
+\subsection{Generación de datasets}
+TO BE DONE
+TODO: Hablar del formato de los datasets (Por transacciones). 
+TODO: Explicar todos los datasets que se generaron
+TODO: Explicar que los datasets se generan dinámicamente
+\subsection{Resumen}
+TO BE DONE
+
+
+
+
+\section{Procesamiento de datos}
+En esta sección se describe como se procesan los datos generados en la sección
+previa, con expectativas de encontrar reglas de asociación que permita hacer el
+analisis exploratorio objetivo.
+
+En primera instancia, con intenciones de tener una idea general del problema,
+se intenta cargar los set de datos más genericos generados. Se busca explorar
+que reglas genera, que tipos de reglas, la cantidad de reglas generadas, como
+también cuales son los valores de soporte y confianza que retorne una cantidad
+de reglas aceptables y útiles. 
+
+\subsection{Weka 3.7.11}
+Se intenta hacer el analisis de reglas de asociaciones con Weka. Este sofware por defecto
+no lee archivos de transacciones, donde una transacción puede ser representada en varias filas,
+ sino que usa el formato donde todas las variables esta definidas en una fila. Para convertir
+de un formato a otro, se utiliza el filtro 
+Denormalize\footnote{http://weka.sourceforge.net/packageMetaData/denormalize/index.html}
+\footnote{El filtro Denormalize requiere la versión de Weka 3.7.2. Este es el motivo por el que 
+el procesamiento se usa mediante una versión en desarrollo de Weka y no una estable}. 
+
+Una vez que se tienen los datasets listo para ser procesados en Weka, se intentan generar reglas
+de asociación exploratorias con Apriori. Se comienza con niveles de soporte y confianza elevados,
+aproximadamente de 0,9 en ambos, y como no generan reglas, se comienza a reducir ambos parámetros
+en 0,10. A medida que el algorítmo comienza a generar reglas, los tiempos de ejecución aumentan
+de forma exponencial. Esto ha impedido generar reglas de asociación no-triviales. Para obtener
+5 reglas básicas, Weka demanda más de 1 hora de procesamiento. Esto complica realizar un análisis
+exploratorio supervisado por el usuario, objeto de interes en esta desarrollo.
+
+Intentando descubrir los motivos de la lentidud de Weka, se han observado 2 factores fundamentales:
+\begin{itemize}
+	\item Weka utiliza sólo 1 de los 4 nucleos disponibles, sin paralelizar el procesamiento
+	\item El filtro Denormalize genera una matriz esparsa con Verdaderos y Falsos, pero \textbf{no} con
+	datos faltantes para los falsos. 
+\end{itemize}
+
+El primer punto no tiene salvación simple. Agregar multiprocesamiento al módulo de apriori esta
+fuera del alcanze del presente análisis.
+
+El segundo punto tiene dos inconvenientes. Por un lado, como ya fue explicado, es el tiempo de 
+procesamiento que demanda este formato. El segundo es que la mayor parte de las reglas de asociación
+generadas, son relacionadas a la no existancia de items, asunto que tiene sentido común.
+
+Para resolver este segundo inconveniente se aplica un segundo filtro donde aplica datos faltantes 
+a los registros falsos. De esta forma se tiene una representación precisa del problema. Al intentar 
+hacer esto, Weka en primer instancia se queda sin memoria. Para ello se modifican los parámetros de
+la virtual machine de Java para asignarle mas memoria. Con 1 GB de memoria, el procesamiento de
+Apriori devuelve reglas de asociación básicas en un tiempo razonable (cercano a los 30 segundos). 
+Sin embargo, cuando a Weka se le piden más reglas de asociaciones y se le disminuyen los rangos de 
+soporte y confianza, el algoritmo requiere una cantidad de tiempo superior a una hora. Estas unidades
+de tiempo de procesamiento dificultan poder hacer un análisis introductorio al problema general,
+motivo por el que se decide intentar con otro software.
+
+
+\subsection{R 3.1.0}
+A la problemática inicial se le suma obtener resultados en tiempo razonables. 
+
+Se procede a realizar el mismo procesamiento de Weka usando R. Se usa el módulo arules. Éste 
+módulo soporta que las entradas tengan un formato de transacciones\footnote{formato donde un 
+campo define el número de transacción y otro campo define el id del producto}
+como de basket\footnote{formato donde en una fila se listan todos los productos de la transacción}.
+Durante todo el procesamiento y análisis se usa el formato por transacciones.
+
+R muestra ser eficiente a la hora de generar reglas de asociaciones. R demora 130 segundos para
+cargar inicialmente la matriz esparsa de datos. Una vez que el dataset esta cargado, todas las
+corridas de Apriori se han ejecutado en menos de 1 segundo. El dataset de referencia es el
+dataset mas grande utilizado durante el trabajo de investigación. Éste tiene
+\begin{itemize}
+	\item 8.870.000 líneas
+	\item 888.000 transacciones
+	\item peso: 220 MB
+	\item contenido: información de películas, usuarios, actores y directores.
+\end{itemize}
+
+En primer termino genera desconfianza  que los tiempos de ejecución de Apriori en R 
+sean tan rápidos,
+más aún al contrastarlos con Weka. 
+El motivo es porque arules maneja eficientemente la matriz esparsa de transacciones y
+porque no almacena los items inexistentes como lo hace Weka.
+
+
+\subsection{Elección de los parámetros de Apriori}
+
+Tener salidas de apriores con tiempos tan cortos, permite que puedan analizarse 
+varios dataset, con distintos contenidos, y poder variar los parámetros de apriori gradualmente
+hasta conseguir los valores adecuados que generen reglas de asociación interesantes.
+
+Esto permite hacer un análisis exploratorio inicial sin mayores dificultades. Más aún, todo el 
+análisis del presente trabajo puede hacerse corriendo Apriori sobre todos los datasets generados
+con un bajo soporte, una baja confianza, y luego ordenar la salida por soporte y confianza.
+Una vez que se tiene las reglas de salida, sólamente resta seleccionar las mejores reglas 
+no triviales con mejores soporte y confianza conjuntos.
+
+Pese a que la librería arules tiene un exelente desempeño en sus tiempos de ejecución, se intenta
+encontrar los parámetros de Apriori adecuados, para que cuando se tenga un set de datos tan pesado
+que el algoritmo demore un tiempo considerable en ser procesado, 
+solo sea necesario hacer unas pocas iteraciones y
+no iterar masivamente hasta encontrar reglas de asociaciones interesantes. En pocas palabras,
+se intenta hacer un análisis exploratorio inteligente y no de fuerza bruta.
+
+Para esto se utiliza el paquete arulesviz, librería que ayuda a mostrar las 
+distintas reglas en un gráfico de dispersión. El gráfico muestra las reglas
+en los distintos niveles de soportes y confianzas. Entonces, un análisis inteligente
+puede hacerse corriendo una vez Apriori con bajos niveles de soporte y confianza, y 
+en base a la nube de puntos se puede elegir estos argumentos para que genere 
+una  cantidad aproximada de reglas deseada. Luego, se deben observar las reglas mismas para ver
+si los resultados son los esperados, y en caso de ser necesario, correr nuevamente
+Apriori con valores mas ajustados u holgados.
+
+En el grafico \ref{arulesviz} muestra la nube de puntos de uno de los dataset de películas.
+Al comenzar a estudiar reglas de asociación se tiene la expectativa de poder generar
+reglas con niveles de soporte cercanos al 90\%, pero tan solo conver el gráfico
+se puede apreciar que hay muy pocas reglas con soporte mayor al 10\%, y que la mayoría
+estan recién cercanas al 0,5\%
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=90mm]{arulesviz.png}
+\caption{Gráfico de dispersion de reglas generadas}
+\label{arulesviz}
+\end{figure}
+
+Al correr Apriori con un minsup del 10\%, para ver cuales son estas reglas tan
+fuertes respecto de las demas, se observan que son reglas cuyo lado izquiero
+esta vacío, o reglas tan triviales como \{sexo$=$hombre\} $=$$>$ \{rating$=$high\}
+
+Es por esto que, para el análisis de peliculas realizado en este informe, se han
+realizado, en primera instancia, 
+ corridas de Apriori con soportes mínimos en el rango de \[0,009 ; 0,03\]
+y confianza en el rango de \[0,05 ; 0,1\]
+
+\section{Análisis}
+En esta sección se analizan las mejores reglas generadas en la sección
+de procesamiento de datos. Se muestran reglas que representan gustos
+de películas, se intenta establecer reglas relacionadas con la
+posición demográfica, como también analizar similitudes entre los
+los rankings de peliculas en el año 2000 y 2001.
+
+\subsection{Reglas generales}
+La primera impresión al ver las reglas generadas por Apriori, es que todas 
+referencian a ratings positivos, siendo muy pocas las relacionadas con 
+calificaciones mediocres o bajas. Es por esto que se analiza la frecuencia
+de estas 3 calificaciones en la tabla \ref{rating_freq}, donde puede
+claramente notarse que existe una tendencia a calificar las 
+películas de forma elevada.
+
+\begin{table}[ht!]
+\caption{Frecuencia de ratings}
+\label{rating_freq}
+\centering
+\begin{tabular}{l c}
+Calificación & Frecuencia \\
+low &  16\% \\
+medium & 26\% \\
+high & 58\%
+\end{tabular}
+\end{table}
+
+\subsubsection{Directores mejor rankeados}
+La tabla \ref{table_best_directors} muesta las reglas relativas a los 
+directores de películas mejor rankeados.
+\begin{table}[ht!]
+\caption{Reglas relativas a directores}
+\label{table_best_directors}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Steven Spielberg\} $=$$>$ \{high\} & 2,36\% & 90\% & 1,15 \\
+\{Alfred Hitchcock\} $=$$>$ \{high\} & 1,23\% & 95\% & 1,22 \\
+\{James Cameron\} $=$$>$ \{high\} & 1,20\% & 89\% & 1,14 \\
+\{Rob Reiner\} $=$$>$ \{high\} & 1,17\% & 92\% & 1,18
+\end{tabular}
+\end{table}
+
+El soporte del director mejor rankeado, Steven Spielberg, es de un 2,36\%. Aunque a nivel
+porcentual este soporte parece bajo, a nivel nominal significa que de 888.500 ratings
+totales, en 21.000 aparecen Steven Spielberg y de esas 18.900 la calificaron como un
+rating \{high\}. Los soportes de la tabla \ref{table_best_directors} 
+son nominalmente significativo. 
+
+\subsubsection{Actores mejor rankeados}
+La tabla \ref{table_best_cast}   muestra las reglas relativas a los actores 
+mejor ranqueados.
+\begin{table}[ht!]
+\caption{Reglas relativas a actores individuales}
+\label{table_best_cast}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Harrison Ford\} $=$$>$ \{high\} & 2,85\% & 91\% & 1,17 \\
+\{Tom Hanks\} $=$$>$ \{high\} & 1,96\% & 89\% & 1,15 \\
+\{Robert De Niro\} $=$$>$ \{high\} & 1,53\% & 87\% & 1,11 \\
+\{Sean Connery\} $=$$>$ \{high\} & 1,35\% & 85\% & 1,09 \\
+\{Arnold Schwarzenegger\} $=$$>$ \{high\} & 1,17\% & 77\% & 0,99
+\end{tabular}
+\end{table}
+
+
+\subsubsection{dupla de actores mejor ranqueados}
+La tabla \ref{table_best_tuple}   muestra las reglas relativas a la 
+dupla de  actores mejor ranqueados.
+\begin{table}[ht!]
+\caption{Reglas relativas a dupla de actores}
+\label{table_best_tuple}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Carrie Fisher, Harrison Ford\} $=$$>$ \{high\} & 1,10\% & 95\% & 1,22 \\
+\{Harrison Ford, Mark Hamill\} $=$$>$ \{high\} & 1,10\% & 95\% & 1,22 \\
+\{Billy Dee Williams, Carrie Fisher\} $=$$>$ \{high\} & 0,70\% & 94\% & 1,20 \\
+\end{tabular}
+\end{table}
+
+Esta tabla confirma aún mas que Harrison Ford es uno de los actores preferidos.
+
+\subsubsection{Generos}
+La tabla \ref{table_genre} muestra los generos mejores ranqueados.
+\begin{table}[ht!]
+\caption{Reglas relativas a actores individuales}
+\label{table_genre}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Drama\} $=$$>$ \{high\} & 23\% & 64\% & 1,11 \\
+\{Comedy\} $=$$>$ \{high\} & 20\% & 54\% & 0,95 \\
+\{Action\} $=$$>$ \{high\} & 14\% & 53\% & 0,93 \\
+\{Romance\} $=$$>$ \{high\} & 9\% & 57\% & 0,99 \\
+\end{tabular}
+\end{table}
+
+La base de datos contiene 18 categorias. En caso de que haya independencia en 
+los gustos de géneros, el soporte de cada categoría debería tender a 5,55\%. 
+Estos niveles de soporte, superiores al 10\% y algunos cercanos al 20\%,
+implican que hay una preferencia sobre los géneros de drama, comedia,
+accion y romance.
+
+\subsubsection{A los hombres les gusta las peliculas de guerra}
+La tabla \ref{table_male_ware} muestra que a los hombres
+les gusta las películas de guerra, con o sin drama. Sin embargo,
+hay una sensible preferencia por las peliculas de guerra sin
+drama.
+
+\begin{table}[ht!]
+\caption{Reglas relacionadas con peliculas de guerra}
+\label{table_male_ware}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{male, war\} $=$$>$ \{high\} & 3,75\% & 69\% & 1,20 \\
+\{Drama, male, war\} $=$$>$ \{high\} & 2,51\% & 75\% & 1,29 \\
+\end{tabular}
+\end{table}
+
+\subsubsection{El declive de la décade de los ' 90}
+Se han generado pocas reglas con calificaciones negativas. Una de las
+que llama la atención es que muchas de ellas son relacionadas con películas
+de la década de los ' 90, tal como muestra en la tabla \ref{table_year_90}.
+\begin{table}[ht!]
+\caption{El declive de los ' 90}
+\label{table_year_90}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{25$-$34, low, male\} $=$$>$ \{1990\} & 3,44\% & 64\% & 1,20 \\
+\{Comedy, low, male\} $=$$>$ \{1990\} & 3,07\% & 65\% & 1,21 \\
+\{Drama, low\} $=$$>$ \{1990\} & 2,77\% & 67\% & 1,21 \\
+\{Action, low, male\} $=$$>$ \{1990\} & 2,74\% & 66\% & 1,25 
+\end{tabular}
+\end{table}
+
+\subsubsection{Las personas de 45 a 55, son quienes mejores califican}
+La tabla \ref{table_age} muestra las reglas de las edades de los que
+mejor califican. Probablemente no sea casualidad que ambas categorías 
+son consegutivas.
+\begin{table}[ht!]
+\caption{Mejores calificaciones según la edad}
+\label{table_age}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{45$-$49\} $=$$>$ \{high\} & 4,50\% & 62\% & 1,08 \\
+\{50$-$55\} $=$$>$ \{high\} & 4,49\% & 59\% & 1,03 \\
+\end{tabular}
+\end{table}
+
+\subsubsection{Generos en común}
+La tabla \ref{table_common_genre} muestra generos relacionados 
+entre si. 
+\begin{table}[ht!]
+\caption{Generos en común}
+\label{table_common_genre}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Action,high,Sci-Fi\} $=$$>$ \{Adventure\} & 2,53\% & 51\% & 3,80 \\
+\{high,Sci-Fi,Thriller\} $=$$>$ \{Action\} & 1,93\% & 76\% & 2,94 
+\end{tabular}
+\end{table}
+
+
+
+
+
+\subsection{Reglas demográficas}
+En esta sección se analiza las relaciones y preferencias según las variables 
+demográficas estado y ciudad. 
+
+\subsubsection{Estados y peliculas}
+La tabla \ref{table_state_population} hace una comparación entre que porcentaje
+de votos hicieron los estados que más calificaron y el porcentaje de habitantes
+que tiene el estado respecto del total del país.
+
+\begin{table}[ht!]
+\caption{Votos y porcentaje poblacional}
+\label{table_state_population}
+\centering
+\begin{tabular}{l l l}
+estado & \% votos & \%población  \\
+California & 18,07 & 11,78 \\
+New York & 7,08 & 6,13 \\
+Minnesota & 6,45 & 1,70 \\
+Illinois & 5,50 & 4,07 \\
+Texas & 5,23 & 8,36
+\end{tabular}
+\end{table}
+
+Estos resultados muestran, principalmente, que tanto el estado de California
+como el de Minesotta, son outlayers severos. Mientras que la población de
+Minesota es del 1,70\% de la población de USA, el 6,45\% de los votos pertenecen
+a este estado. El ratio es cercano a 4 veces más su población, lo que demuestra
+que el estado de Minnesota tiene una preferencia de entretenerse viendo películas.
+Algo similar sucede con el estado de Californa, donde su población es de casi el
+12\% de los Estados Unidos, pero el 18\% de los votos totales pertenecen a este
+estado. California también es un outlayer, pero este se comprende mas ya que la
+mayor industria cinematográfica de Estados Unidos es Hollywood, que se encuentra
+en el estado de California.
+
+Otro de los puntos destacados que muestra la table \ref{table_state_population} es
+que el estado de Texas no es propenso a entretenerse mirando películas.
+
+Otra regla interesante es que el estado que mejor califica películas es California.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{high\} $=$$>$ \{CA\} & 10,44\% & 57\% & 1,03 \\
+\{MN\} $=$$>$ \{HIGH\} & 3,81\% & 59\% & 1,03 
+\end{tabular}
+\end{table}
+
+Este sesgo posiblemente también se deba a que Hollywood pertenece a California,
+y mucha gente que vive de esta industria o se ve influenciada por su cercanía
+física, 
+esta calificando de forma positiva las películas. Es consistente que la regla
+\{MN\} $=$$>$ \{HIGH\} tiene un soporte del 3,81\%, respecto del 10,44\% de 
+California, ya que Minesotta no se encuentra influenciada por Hollywood.
+
+\subsubsection{ciudades y peliculas}
+La tabla \ref{citi_votes} muestra las ciudades que más votos realizaron y
+la tabla \ref{citi_high} muestra las reglas de ciudades con mas calificaciones
+positivas. Ambas tablas son consistentes entre si, y también son consistentes
+con el análisis de los estados. Lo que llama la atención es que la ciudad de Los
+Angeles, la 2da ciudad mas  pobladas de los Estados Unidos, 
+ciudad que también pertenece al estado de California, 
+\textbf{no} esta incluida entre las que mas votan\footnote{Los Angeles tiene
+un 1\% de los votos totales}, como tampoco se pudieron generar reglas que 
+incluyan a esta ciudad y a algúna calificación. Esta inexistencia
+de reglas para esta ciudad particular, implicaría una "pseudo-regla" que
+refleja que a la ciudad de Los Angeles \textbf{no} le gusta ver películas.
+ 
+\begin{table}[ht!]
+\caption{Votos por ciudades}
+\label{citi_votes}
+\centering
+\begin{tabular}{l l }
+ciudad & \% votos \% \\
+Minneapolis & 2,52\% \\
+New York & 2,37\% \\
+San Francisco & 2,12\% \\
+Saint Paul & 2,09\%  \\
+\end{tabular}
+\end{table}
+
+\begin{table}[ht!]
+\caption{Votos positivos por ciudad}
+\label{citi_high}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{Minneapolis\} $=$$>$ \{high\} & 1,48\% & 58\% & 1,02 \\
+\{New York\} $=$$>$ \{high\} & 1,38\% & 58\% & 1,01 \\
+\{San Francisco\} $=$$>$ \{high\} & 1,22\% & 57\% & 0,99 \\
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Estados y géneros}
+En esta sección se analiza la relaciones existentes entre estados y géneros
+de películas. La tabla \ref{table_genre_state} resume la reglas mas relevantes al respecto.
+
+\begin{table}[ht!]
+\caption{Reglas mas relevantes sobre géneros y estados}
+\label{table_genre_state}
+\centering
+\begin{tabular}{l l l l l }
+nro & regla & sop. & conf. & lift \\
+I & \{\} $=$$>$ \{Drama\} & 36\% & 36\% & 1 \\
+II & \{\} $=$$>$ \{Comedy\} & 35\% & 36\% & 1 \\
+III & \{\} $=$$>$ \{Action\} & 26\% & 26\% & 1 \\
+IV & \{\} $=$$>$ \{Thriller\} & 19\% & 19\% & 1 \\
+V & \{CA\} $=$$>$ \{Drama\} & 6,69\% & 37\% & 1,02 \\
+VI & \{CA\} $=$$>$ \{Comedy\} & 6,32\% & 34\% & 0,97 \\
+VII & \{CA\} $=$$>$ \{Action\} & 4,70\% & 26\% & 1,00 \\
+VIII & \{CA\} $=$$>$ \{Thriller\} & 3,48\% & 19\% & 1,14 \\
+IX & \{CA,high\} $=$$>$ \{Drama\} & 4,31\% & 41\% & 1,42 \\
+X & \{CA,high\} $=$$>$ \{Comedy\} & 3,53\% & 33\% & 0,94 \\
+\end{tabular}
+\end{table}
+
+La 1ra a 4ta regla muestra que en todo Estados Unidos, 
+la gente mira príncipalmente pelícuas de drama y comedia, 
+en 3er medida de acción y en 4ta  Thriller. 
+La 4ta a 8va regla se muestran las asociaciones mas fuertes que del 
+lado izquierdo pertenece a un estado, y el derecho a un género
+de película. Las 4 reglas tienen un soporte relativamente significativo y
+pertenecen todas al mismo estado: California, estado con mayores votaciones.
+Lo más interesante, es que los géneros de películas más vistos en California,
+coinciden con los de todo Estados Unidos, tanto en orden, como en distancia
+relativa entre cada uno de ellos.
+La 9ena y 10ma regla muestra las asociaciones con mayores soporte y confianza, cuyo
+lado izquierdo tiene un estado y una calificación elevada, y el lado derecho
+un género. Los resultados, no por casualidad, coinciden con las películas
+mas vistas en California, como en todo Estados Unidos.
+
+El análisis de la tabla \ref{table_genre_state} nos permite concluir que
+California es un estado dominante en cuestión de género de peliculas. 
+
+Sería interesante analizar si esta misma posición dominante se repite en el pasado.
+Si llegase a ser así, pero con diferentes géneros, se podría pensar que la industria
+cinematográfica de Holliwood sigue los gustos de California, y un cambio en los 
+gustos de ese estado, impactaría en el tipo de peliculas que Estados Unidos produciría.
+
+La tabla \ref{table_genre_state_high} muestra las reglas de asociación mas fuerte que
+destacan los géneros mejores calificados para cada estado relevante.
+
+\begin{table}[ht!]
+\caption{Generos mejores calificados por estado}
+\label{table_genre_state_high}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{CA,Drama\} $=$$>$ \{high\} & 4,31\% & 64\% & 1,11 \\
+\{CA,Comedy\} $=$$>$ \{high\} & 3,53\% & 56\% & 0,97 \\
+\{Drama,NY\} $=$$>$ \{high\} & 1,79\% & 63\% &  1,13 \\
+\{Comedy,NY\} $=$$>$ \{high\} & 1,36\% & 54\% &  0,98 \\
+\{Drama,MN\} $=$$>$ \{high\} & 1,50\% & 65\% &  1,07 \\
+\{Comedy,MN\} $=$$>$ \{high\} & 1,37\% & 56\% &  0,88 \\
+\{Drama,IL\} $=$$>$ \{high\} & 1,21\% & 61\% & 1,13 \\
+\{Comedy,IL\} $=$$>$ \{high\} & 1,01\% & 50\% & 0,98 \\
+\{Drama,TX\} $=$$>$ \{high\} & 1,22\% & 65\% & 1,15 \\
+\{Comedy,TX\} $=$$>$ \{high\} & 1,11\% & 56\% & 0,98 \\
+\{Drama,MA\} $=$$>$ \{high\} & 1,12\% & 66\% & 1,15 \\
+\{Comedy,MA\} $=$$>$ \{high\} & 1,00\% & 58\% & 1,02 \\
+\end{tabular}
+\end{table}
+
+Esta tabla refuerza aún más la posición dominante que tiene California sobre la industria
+cinematográfica. En todos los estados mas destacados, los géneros de 
+las peliculas mas vistas coinciden con los de California. La diferencia es el nivel de
+soporte de estas reglas respecto a porcentaje poblacional e inclusive al porcentaje de
+votos en esta encuenta. California tiene porcentajes relativos mucho mas fuertes, avalando
+la hipótesis de que Hollywood produce películas del agrado de California, y el resto de
+los estados mira las películas realizadas por su mayor productor.
+
+
+\subsubsection{Ciudades y géneros}
+Al intentar encontrar la existencia de relaciones entre ciudades y géneros, se
+han encontrado las reglas de la tabla \ref{citi_genre}.
+
+\begin{table}[ht!]
+\caption{Generos mas vistos por ciudad}
+\label{citi_genre}
+\centering
+\begin{tabular}{l l l l }
+regla & sop. & conf. & lift \\
+\{New York\} $=$$>$ \{Drama\} & 0,99\% & 42\% & 1,63 \\
+\{Minneapolis\} $=$$>$ \{Drama\} & 0,93\% & 37\% & 1,02 \\
+\{Seattle\} $=$$>$ \{High\} & 1,12\% & 63\% & 1,10 \\
+\end{tabular}
+\end{table}
+
+Estas reglas no aportan información relevante, solo refuerzan el desarrollo
+previo. Posiblemente la imposibilidad de encontrar una fuerte relación entre
+ciudades y géneros se debe a 2 motivos:
+\begin{itemize}
+\item El nivel de granularidad de agrupamiento por ciudad es elevado.
+\item Los géneros de películas mas vistas estan muy concentrados. Los 3 géneros
+mas importantes se llevan más del 70\% de la torta, haciendo insignificante la
+producción de otros géneros. Si los géneros producidos fuesen estuviesen
+distribuidos más uniformemente, 
+posiblemente pueda esperarse que a la ciudad de Utah tenga preferencias por las
+películas religiosas, los de New York por musicales y Las Vegas por películas 
+para adultos.
+\end{itemize}
+
+
+
+
+
+\subsection{Gustos del año 2000 vs. 2001}
+TO BE DONE
+
+\section{Conclusiones}
+TO BE DONE
+
+\section{Posibles mejoras}
+Normalizar las calificaciones POR USUARIO
+Hablar de crear una DB
+Hablar de probar con Neo4J
+
+\section*{REFERENCES}
+
+\end{document}
