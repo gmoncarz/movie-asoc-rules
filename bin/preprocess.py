@@ -770,8 +770,8 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high",
             
             for rating in movie.rating:
                 if ranking == None or rating.ratingCat == ranking:
-                    currentRatingYear = datetime.datetime.fromtimestamp(int(rating.timestamp)).strftime('%Y')
-                    if ratingYear==None or str(ratingYear)==currentRatingYear:
+                    currentRatingYear = int(datetime.datetime.fromtimestamp(int(rating.timestamp)).strftime('%Y'))
+                    if ratingYear==None or currentRatingYear in ratingYear:
                         transid += 1
                         user = usersDict[rating.userid]
                         fixedUser = [user.ageCat, "prof_" + user.profession]
@@ -929,6 +929,54 @@ def writeLocationGenre(filename, moviesDict, usersDict, ranking="high", citi=Tru
 
 
 
+def writeOnlyActorsDirectors(filename, moviesDict, usersDict, ranking=None, 
+  actors=True, directors=True):
+    """Write a transaction file ready to be process by R.
+
+    The file will write """
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            cast = map((lambda x: "actor_" + x), movie.cast) if movie.cast else ['?']
+            
+            if directors and movie.director:
+                fixedMovie = ["director_" + movie.director ]
+            else:
+                fixedMovie = []
+            
+            for rating in movie.rating:
+                if ranking == None or rating.ratingCat in ranking:
+                    transid += 1
+                    user = usersDict[rating.userid]
+                    fixedRating = [ rating.ratingCat ]
+     
+                    lst = fixedMovie[:]
+                    lst.extend(fixedRating)
+                    if actors:
+                        lst.extend(cast)
+                    lst = map(unicode, lst)
+                    for item in lst:
+                        fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
+
+
+
+
 
 
 
@@ -992,6 +1040,12 @@ def main():
       (config['output']['base_path'], config['output']['fileLike2000'])
     outputFileLike2001 = "%s/%s" %  \
       (config['output']['base_path'], config['output']['fileLike2001'])
+    outputFileLike2002 = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileLike2002'])
+    outputActors = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileActors'])
+    outputDirectors = "%s/%s" %  \
+      (config['output']['base_path'], config['output']['fileDirectors'])
 
     # Load all movies
     moviesDict = load_movies(movieFile)
@@ -1036,11 +1090,17 @@ def main():
 #      ranking=None, citi=True, state=False, director=False )
 #    writeLocationGenre(outputLocationStateGenre, moviesDict, usersDict, 
 #      ranking=None, citi=False, state=True, director=False )
-    writeTransActorsDirectors(outputFileLike2000, moviesDict, usersDict, 
-      ranking=None, writeGenre=False, ratingYear=2000)
-    writeTransActorsDirectors(outputFileLike2001, moviesDict, usersDict, 
-      ranking=None, writeGenre=False, ratingYear=2001)
-    
+#    writeTransActorsDirectors(outputFileLike2000, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False, ratingYear=(2000,))
+#    writeTransActorsDirectors(outputFileLike2001, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False, ratingYear=(2001,))
+#    writeTransActorsDirectors(outputFileLike2002, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False, ratingYear=range(2002,2015))
+#    writeOnlyActorsDirectors(outputDirectors, moviesDict, usersDict, 
+#      ranking=["high", "low"], actors=False, directors=True )
+#    writeOnlyActorsDirectors(outputActors, moviesDict, usersDict, 
+#      ranking=["high", "low"], actors=True, directors=False )
+   
 
     return 0
 

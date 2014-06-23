@@ -26,7 +26,10 @@ laptop:
     fileLike13: movies_directors_ranking.csv
     fileLike2000: movies_actors_directors_2000.csv
     fileLike2001: movies_actors_directors_2001.csv
-    
+    fileLike2002: movies_actors_directors_2002.csv
+
+    fileDirectors: directors.csv
+    fileActors: actors.csv
 
     fileLocationCitiMovie: locationCitiMovie.csv
     fileLocationStateMovie: locationStateMovie.csv
