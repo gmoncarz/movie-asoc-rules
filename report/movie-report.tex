@@ -5,6 +5,9 @@
 \usepackage{lipsum}
 \usepackage{graphicx}
 \usepackage[spanish]{babel}
+\usepackage{tikz}
+\usepackage{pgf-pie}
+\usepackage{babel,blindtext}
 
 \begin{document}
 
@@ -640,9 +643,173 @@ para adultos.
 
 
 
+\subsubsection{Análisis de usuarios}
+En esta sección se analiza las carácteristicas de los usuarios que realizan
+calificaciones. Con este propósito se divide el set de datos en 3 grupos:
+\begin{enumerate}
+\item Los usuarios que calificaron películas en el año 2000.
+\item Los usuarios que calificaron películas en el año 2001.
+\item Los usuarios que calificaron películas desde el 2002 para adelante.
+\end{enumerate}
+El objetivo es encontrar características similares de los primeros 2 grupos
+y verificar si éstas también se encuentran presentes en el último.
 
-\subsection{Gustos del año 2000 vs. 2001}
-TO BE DONE
+Para este análisis lo que primero se tiene en cuenta es la distribución
+de la cantidad de votos de cada grupo.
+\begin{tikzpicture}
+  \pie{90/año 2000, 7/año 2001, 3/$>$$=$2002}
+\end{tikzpicture}
+
+El 2do paso a realizar es hacer algunas corridas exploratorias en cada
+grupo y graficar la nube de puntos con el soporte de arulesViz. 
+
+\begin{figure}[ht!]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{2000.png}
+  \caption{Reglas para el año 2000. Minsup$=$0.05 Minconf$=$0.1}\label{fig:arules2000}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{2001.png}
+  \caption{Reglas para el año 2001. Minsup$=$0.05 Minconf$=$0.1}\label{fig:arules2001}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{2002.png}
+  \caption{Reglas para el año 2002 en adelante. Minsup$=$0.05 Minconf$=$0.1}\label{fig:arules2002}
+\endminipage
+\end{figure}
+
+En las figuras \ref{fig:arules2000}, \ref{fig:arules2001} y \ref{fig:arules2002} 
+se puede ver que, con los mismos parámetrosi, la cantidad de reglas
+generadas son del mismo orden, como también, la distribución de las reglas
+en la nube de puntos son muy similares en los 3 grupos.
+
+Al navegar detenidamente la reglas más importantes de los 3 grupos 
+se puede apreciar la semejanza
+entre ellas. La tabla \ref{comparacion} hace un resumen de estas.
+
+\begin{table*}[ht!]
+\caption{Reglas de semejanza de usuarios}
+\label{comparacion}
+\centering
+\begin{tabular}{|l l ||l l|l l|l l|}
+	\hline
+	nro & regla & 
+	\multicolumn{2}{c|}{año 2000} & 
+	\multicolumn{2}{c|}{año 2001} & 
+	\multicolumn{2}{c|}{año 2002} \\
+	     &  & sop & conf & sop & conf & sop & conf \\
+	I    & \{\} $=$$>$ \{male\} & 75\% & 75\% & 74\% & 74\% & 67\% & 67\% \\
+	II   & \{\} $=$$>$ \{female\} & 24\% & 24\% & 26\% & 26\% & 32\% & 32\% \\
+	III  & \{\} $=$$>$ \{Administ.\} & 13\% & 13\% & 17\% & 17\% & 15\% & 15\% \\
+	IV   & \{\} $=$$>$ \{25$-$34\} & 39\% & 39\% & 42\% & 42\% & 40\% & 40\% \\
+	V    & \{\} $=$$>$ \{35$-$44\} & 20\% & 20\% & 17\% & 17\% & 14\% & 14\% \\
+	VI   & \{\} $=$$>$ \{18$-$24\} & 18\% & 18\% & 23\% & 23\% & 22\% & 22\% \\
+	VII  & \{\} $=$$>$ \{high\} & 58\% & 58\% & 55\% & 55\% & 53\% & 53\% \\
+	VIII & \{\} $=$$>$ \{medium\} & 26\% & 26\% & 28\% & 28\% & 28\% & 28\% \\
+	IX   & \{\} $=$$>$ \{low\} & 16\% & 16\% & 16\% & 16\% & 18\% & 18\% \\
+	X    & \{H. Ford\} $=$$>$ \{high\} & 2,18\% & 74\% & 1,33\% & 66\% & 1,25\% & 65\% \\
+	XI  & \{18$-$24\} $=$$>$ \{Administ.\} & 8,54\% & 47\% & 11\% & 50\% & 10\% & 70\% \\
+	XII & \{Advent\} $=$$>$ \{Action\} & 9,72\% & 69\% & 6,77\% & 64\% & 6,37\% & 62\% \\
+	XIII  & \{romance\} $=$$>$ \{25$-$34\} & 6,05\% & 39\% & 6,09\% & 41\% & 6,06\% & 39\% \\
+	XIV   & \{Administ.\} $=$$>$ \{high\} & 7,23\% & 56\% & 9,10\% & 52\% & 6,86\% & 46\% \\
+	XV  & \{S. Spielberg\} $=$$>$ \{high\} & 1,81\% & 73\% & 1,10\% & 72\% & 1,07\% & 68\% \\
+	\hline
+\end{tabular}
+\end{table*}
+
+Las primeras 2 reglas muestran el sexo de los usuarios. 
+En los 3 conjuntos de datos los hombres han tenido una posición mayoritaria holgada. 
+Sin embargo, a partir del 2002, las mujeres tienen una
+mayor participación en el set de votaciones, lo que se puede inferir 3 hipótesis
+no excluyentes:
+\begin{itemize}
+\item La mujer esta teniendo mas particion en el rubro informático y/o acceso a Internet, ya que las 
+votaciones se hacen on-line
+\item Las mujeres estan viendo mas películas a partir del año 2002.
+\end{itemize}
+
+Para obtener la 3er regla se solicita a R que devuelva la profesión que más votaciones 
+ha realizado en cada set de datos, siendo los administrativos los primeros en todos los casos.
+Dado que hay más de 20 profesiones, en caso de haber independencia de los gustos sobre profesiones, 
+el valor esperado sería del 5\%, pero los administrativos tienen valore comprendidos entre el
+13 y 17\%, lo que comprueba que los administrativos son los más afines a entretenerse mirando
+películas.
+
+Luego se hace un análisis por edad. Al analizar este area, se debe tener conciencia
+sobre el entorno y sobre la posibilidad de acceso de las distintas edades al sistema de calificaciones.
+Es posible que los chicos pequeño vean muchas películas, pero no tengan capacidad
+de realizar votaciones. Del mismo modo, es posible que las personas muy adultas y
+retiradas también sean asiduos expectadores, pero no tengan  interes en contribuir al sistema
+de rating. Por lo tanto, hay que tomar conciencia que los análisis por edades pueden estar
+sesgado por el interes de una generación en brindar información.
+
+ La regla IV muestra
+que el rango de 25 a 34 años es el que, por lejos, más peliculas mira. En todo momento
+lleva una diferencia de aproximadamente el doble respecto al segundo.
+
+Las reglas V y VI muestran que hay un cambio de tendencia con los rangos 35$-$44 y
+18$-$24: A partir del 2001, el rango 18$-$24 tiene una participación más activa
+al calificar películas que el de 35$-$44, ya que pasan de un 18\% en 2000, a
+un 23\% y 22\% a partir del 2001.
+
+Las reglas VII, VIII y IX muestran que tan bondadosos son los usuarios. En todo
+momento los usuarios tienden a calificar positivamente las películas y muestran
+rechazo por asignar calificaciones bajas. Las calificaciones positivas son 
+constantemente más del doble de las mediocres y más del triple las negativas.
+Sin  embargo, con el tiempo se va observando que el espectador se vuelve un
+poco más exigente, ya que en el año 2000 los votos positivos eran un 58\%, en
+2001 un 55\% y desde el 2002 un 53\%.
+
+Para generar la regla X se solicita el actor mejor calificado en cada dataset.
+En todos estos Harrison Ford esta liderando el ranking. 
+
+Para generar la regla XI, se pide a R que retorne las profesiones más relevantes
+para cada rango de edad, siendo \{18$-$24\} $=$$>$ \{Administrator\} las de 
+mayor soporte en todo momento.
+
+La regla XII muestra que las personas que miran películas de aventuras, también
+observan de acción. Esta regla se conserva en los 3 períodos analizados.
+
+La regla XIII se analiza cual es el rango de edad preferido para las películas
+románticas. En todos los set de datos fue el rango de 25$-$34, con un nivel
+de soporte y confianza parejo en todo momento. Esto podría inducir que, 
+por cuestiones psicológicas, los jovenes de 25 a 34 años son los más 
+románticos.
+
+Para generar la regla XIV Se le pide al software que devuelva cual es la profesión
+más generoso al calificar películas. Los administrativos son lideres en este
+aspecto con el correr del tiempo.
+
+Para la regla XV se pide el director de cine mejor calificado en cada período.
+Steven Spielberg estuvo en la vanguardia en todo momento.
+
+Por último, en la table \ref{genre_female} se analiza cual 
+es el género mas visto por las mujeres en cada momento.
+
+\begin{table}[ht!]
+\caption{Generos mas escogidos por las mujeres}
+\label{genre_female}
+\centering
+\begin{tabular}{l l l l }
+year & regla & sop. & conf. \\
+2000 & \{Romance\} $=$$>$ \{female\} & 5,22\% & 33\%  \\
+2001 & \{Comedy\} $=$$>$ \{female\} & 10,12\% & 27\%  \\
+$>$$=$ 2002 & \{Romance\} $=$$>$ \{female\} & 6,33\% & 41\%  \\
+\end{tabular}
+\end{table}
+
+Tanto en el año 2000 como a partir del 2002, es el género romántico. Sin embargo, 
+en el año 2001, el género de comedia prima por sobre el romance en más de 100\%:
+en 2001 y desde 2002, el soporte de \{Romance\} $=$$>$ \{female\} es de entre
+un 5 y 6\%, pero en 2001, la regla \{Comedy\} $=$$>$ \{female\} es de un 10\%.
+
+Previo a finalizar esta sección, debe recordarse y tenerse en cuenta que 
+ el 90\% de los datos que están en el dataset son del año 2000, quedando solo un 6\%
+para el año 2001 y un 3\% para los años posteriores. Pese a que un  3\% 
+no es un porcentaje significante, son 24.000 votaciones, número no despreciable.
+Como se analizaron cada rango de tiempo en dataset independientes, el soporte
+y la confianza de las reglas son comparables entre si, independientemente de la 
+cantidad nominale de datos, ya que estos resultados son porcentuales.
 
 \section{Conclusiones}
 TO BE DONE
