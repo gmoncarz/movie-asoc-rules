@@ -8,6 +8,33 @@
 \usepackage{tikz}
 \usepackage{pgf-pie}
 \usepackage{babel,blindtext}
+\usepackage{color}
+
+
+
+% Custom colors
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{07} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{06}  % for normal
+
+\lstdefinestyle{python_gabo}{
+  breaklines=true,
+	language=Python,
+	basicstyle=\ttm,
+	otherkeywords={self},             % Add keywords here
+	keywordstyle=\ttb\color{deepblue},
+	emph={MyClass,__init__},          % Custom highlighting
+	emphstyle=\ttb\color{deepred},    % Custom highlighting style
+	stringstyle=\color{deepgreen},
+	frame=tb,                         % Any extra options here
+	showstringspaces=false,            % 
+  commentstyle=\ttb,
+}
+
 
 \begin{document}
 
@@ -21,6 +48,7 @@
 \maketitle % this produces the title block
 
 \begin{abstract}
+R es una maravilla
 TO BE DONE
 \end{abstract}
 
@@ -30,42 +58,67 @@ Reglas de asociación
 Peliculas
 \end{IEEEkeywords}
 
+
+
+
+
+
+
 \section{INTRODUCUCCIÓN}
 
-TO BE DONE
+Las reglas de asociaciones son una herramienta de aprendizaje automático para
+tratar de identificar patrones comunes no triviales en conjuntos de datos
+extensos. La idea general hacer un análisis exploratorio para  encontrar 
+asociaciones del estilo \{A\} $=$$>$ \{B\} que significan 
+"si sucede A, entonces sucede B". 
 
+El trabajo presentado se orienta a hacer un análisis de reglas de asociacion con
+fines académicos. Se pretender explorar como funcionan, cuales son  su desempeño y
+cuales son el tipo de asociaciones que se pueden generar. Para esto se
+hace un analisis en profundidad de una problema en particular. Se
+explica en detalle cada uno de los pasos realizados y se justifica cada una de 
+las decisiones tomadas.
 
+El problema a desarrollar esta relacionado con la industria cinematográfica.
+Se tiene información de usuarios que califican películas. Se pretende encontrar
+las preferencias de los usuarios, sus gustos, sus caracteristicas según su
+posición demográfica y si han habido algún cambio de tendencia en las valuaciones.
+
+En la sección de Datos se detalla los datos fuentes, como se los transforma,
+discretiza y preprocesa para generar información útil y comoda para un análisis
+de reglas de asociaciones; En la sección de Procesamiento de datos se 
+explica los software utilizados, ventajas y defectos, como la elección de los
+parámetros idóneos de los algoritmos; En la sección de Análisis se interpretan
+las reglas de asociaciones obtenidas; En la sección de Conclusiones se enuncian
+las conclusiones del trabajo; Y por último, se enuncian las posibles mejoras
+que pueden realizarse.
 
 
 
 \section{Datos}
-En la presente sección se analiza losdatos originales, como fueron enriquesidos,
-como se los ha manipulado y las transformaciones realizadas. También se explica como
-todo el procesamiento se ha automatizado con intenciones de que este mismo análisis 
+En la presente sección se analiza los datos originales, como fueron enriquesidos,
+como se los ha manipulado y las transformaciones realizadas. También se explica como 
+el procesamiento se ha automatizado 
+de forma íntegra, con intenciones de que este mismo análisis 
 pueda realizarse en caso de tener tanto datasets distintos, como se desee incorporar
 nuevas entradas a los datos existentes.
 
 \subsection{Fuente de datos}
-El punto de partida del presente trabajo son  archivos relacionados con la información
-sobre pelícuas y rating de películas. Los archivos en cuestión son 3
-\begin{itemize}
+El punto de partida del presente trabajo son  archivos relacionados con información
+sobre pelícuas y rating de películas. Los archivos en cuestión son 3:
+\begin{enumerate}
 	\item Peliculas: contiene 3.883 películas a ser analizadas. La información sobre cada
 		una de ellas es:
 		\begin{itemize}
 			\item Código de película
 			\item Nombre de la película
 			\item Lista de géneros a la que pertenece
-				\begin{lstlisting}[frame=single]
-1::Toy Story (1995)::Animation
-            |Children's|Comedy
-2::Jumanji (1995)::Adventure
-           |Children's|Fantasy
-3::Grumpier Old Men (1995)
-              ::Comedy|Romance
-4::Waiting to Exhale (1995)
-              ::Comedy|Drama
-5::Father of the Bride Part II 
-              (1995)::Comedy
+				\begin{lstlisting}[frame=single, breaklines=true]
+1::Toy Story (1995)::Animation|Children's|Comedy
+2::Jumanji (1995)::Adventure|Children's|Fantasy
+3::Grumpier Old Men (1995)::Comedy|Romance
+4::Waiting to Exhale (1995)::Comedy|Drama
+5::Father of the Bride Part II  (1995)::Comedy
 				\end{lstlisting}
 		\end{itemize}
 
@@ -98,7 +151,7 @@ sobre pelícuas y rating de películas. Los archivos en cuestión son 3
 			\item Rating/evaluación asignada
 			\item tiempo: momento en que es evaluada
 
-        \begin{lstlisting}[frame=single]
+        \begin{lstlisting}[frame=single,breaklines=true]
 1::1193::5::978300760
 1::661::3::978302109
 2::3108::3::978299712
@@ -108,29 +161,301 @@ sobre pelícuas y rating de películas. Los archivos en cuestión son 3
         \end{lstlisting}
     \end{itemize}
 
-\end{itemize}
+\end{enumerate}
 
 Estos 3 archivos son, en resumen, los datos crudos utilizados. 
-Todo el tratamiento de datos posterior, enriquesimiento de información como los
+Todo el tratamiento de datos posterior, tanto el enriquesimiento de información como los
 análisis y conclusiones finales, estan basados en el contenido de estos 3 archivos
 fuentes.
 
-\subsection{Preprocesamiento}
-TO BE DONE
-\subsection{Discretización de datos}
-TO BE DONE
+\subsection{Automatización para el preprocesamiento}
+El objetivo de la automatización de los datos es generar un algoritmo que se encargue
+de hacer todo el pre-procesamiento de la información. Las tareas del pre-procesamiento
+son: eliminación  y tratamiento  de datos faltantes o erroneos, filtrado de información,
+agrupamiento y/o transformación.
+\emph{El objetivo principal de este proceso es que su salida genere información clara, limpia y cómoda
+para ser procesada por los algorítmos de análisis propiamente dicho -Apriori en este caso-.}
+
+Lo primero que se hace es conocer los datos de forma general, hacer un análisis descriptivo,
+exploratorio, conoces que tipo de datos son, sus frecuencias y relaciones. Luego se realiza un
+borrador de los procesos que se deben correr a los datos para generar la información de salida 
+deseada. El mayor inconveniente es que \emph{no siempre se conoce de antemano cuales son las
+salidas ideales a generar}. Es frecuente una vez que se esta haciendo el análisis profundo
+de los datos, se crea conveniento tener los datos en distintos formatos, estructuras de
+datos u ordenes.
+
+Existen varias alternativas para resolver este inconveniente. La realizada en el presente
+trabajo es desarrollar un software cuyas entradas sean los 3 archivos presentados en 
+la sección de datos. Estos archivos son procesados automáticamente, pero el usuario
+puede implementar diferentes funciones de salida ad-hoc, que determinan cuales son
+las salidas a generar, formatos, ordenes, etc.
+
+Existen ocasiones en los que el usuario encuntra un formato eficiente, pero la cantidad
+de datos generados es mayor a la necesaria, haciendo que el proceso de análisis corra
+mas lento de lo necesario. Por ejemplo, si se quiere analizar generos de películas y
+estados demográficos, tener un set de datos con actores y profesiones de los calificadores
+es irrelevante, consume más memoria, demanda mas tiempo en procesar datos innecesarios
+y podría llegar a hacer que el análisis sea abortado.
+
+Es para solucionar este tipo de inconvenientes que el desarrollo realizado hace un
+procesamiento inicial de los datos, los limpia y transforma tanto como puede, y luego
+deja para el usuario escoger filtros y procesamientos ad-hoc para su salida final.
+
+En caso de que el usuario, durante el analisis de reglas de asoción, crea conveniente
+tener un nuevo set de datos con otras caraterísticas, sólo debera implementar su
+nueva función de salida (generalmente se modifican parámetros de las funciones ya
+existentes) para luego correr el algoritmo y tener la información lista para ser 
+procesada.
+La lista \ref{code:pre_process_output} muestra uno de los generadores de salida
+usados en el trabajo.
+
+\begin{lstlisting}[style=python_gabo,
+	caption={Descriptive Caption Text} ,label=code:pre_process_output,
+	]
+def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high",
+  writeGenre=False, ratingYear=None):
+    """Write a transaction file ready to be process by R.
+
+    The function is able to generate a basic output structure with optionales
+    fields. 
+    The parameters are:
+     * filename: output filename 
+     * moviesDict: dictionary of moviews
+     * usersDict: Dictionary with the users that calified movies
+     * ranking: only display the transaction whose quialification is equal to
+        this parameter. If ranking=None, the filter will write all transactions
+     * writeGenre: Choose to write the movies genres
+     * ratingYear: list that filter only the years that the rating were performed
+    """
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            cast = map((lambda x: "actor_" + x), movie.cast) if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
+
+            if movie.director:
+                fixedMovie = [movie.name, "director_" + movie.director ]
+            else:
+                fixedMovie = [movie.name]
+
+            for rating in movie.rating:
+                if ranking == None or rating.ratingCat == ranking:
+                    currentRatingYear = int(datetime.datetime.fromtimestamp(int(rating.timestamp)).strftime('%Y'))
+                    if ratingYear==None or currentRatingYear in ratingYear:
+                        transid += 1
+                        user = usersDict[rating.userid]
+                        fixedUser = [user.ageCat, "prof_" + user.profession]
+                        fixedRating = [ rating.ratingCat ]
+
+                        lst = fixedMovie[:]
+                        lst.extend(fixedUser)
+                        if ranking == None:
+                            lst.extend(fixedRating)
+                        lst.extend(cast)
+                        if writeGenre:
+                            lst.extend(map((lambda x: "genre_" + x), genres))
+                        lst = map(unicode, lst)
+                        for item in lst:
+                            fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    h.close()
+\end{lstlisting}
+
+
+\subsection{Software de automatizacion}
+El desarrollo para automatización de pre-procesamiento es realizado por 
+los integrantes del trabajo en Python, bajo licencia GNU. Se lo puede bajar,
+usar y clonar\footnote{El termino adecuado es fork}. Esta alojado en GitHub, en la 
+dirección https://github.com/gmoncarz/movie-asoc-rules. 
+
+En terminos generales, el flujo de trabajo del software es
+\begin{enumerate}
+\item Leer un archivo de configuración. Este archivo 
+contiene los archivos de entrada, los archivos de salida,
+como también parámetros general del algoritmo.
+El usuario, si lo desea, puede generar sus parametros custom. De
+esta forma, la configuración del pre-procesamiento esta cargada en este
+archivo. El usuario tiene la posibilidad de generarse varios archivos
+de configuración, de acuerdo a las salidas deseadas.
+\item Cargar las películas del archivo de entrada
+\item Leer información adicional de cada pelicula
+\item Preprocesar las peliculas de forma aislada
+\item Cargar los usuarios del archivo de entrada
+\item Leer información adicional de los usuarios
+\item Preprocesas los usuarios
+\item Leer los ratings del archivo de entrada
+\item Asociar las películas y los usuarios a través de los ratings
+\item Generar los archivos de salida
+\end{enumerate}
+
+Es importante aclarar que este desarrollo, desde sus comienzos,
+es diseñado para trabajar con grandes cantidades de datos con relativa
+eficiencia. Pese a que hay unos cuantos detalles de performance por pulir,
+los datos \textbf{no} no cargados todos en memoria. Se usan estructuras
+de datos con persistencia. Esto significa que los datos son cargados
+archivos binarios, eficientes, y se va accediendo a ellos mediante
+un cache en memoria. De esta manera, la cantidad de datos a pre-procesar
+no se encuentra limitada por la memoria de la computadora donde
+el software se ejecuta.
+
+\subsection{Discretización y transformación de datos}
+Una vez que las instancias se cargan, se hace una limpieza básica de datos.
+Esta consiste en verificar la existencia de datos, que éstos pertenezcan
+al dominio de datos (ie. peliculas no vacias, años luego de 1900 e inferiores
+al año actual, sexo de los usuarios sean masculino o femenino, que las
+profesiones esten en el rango definido, etc.)
+
+El segundo paso consiste hacer algunas transformaciones de datos. Los nombres
+de películas aparecen junto al año de cración entre parentesis. Esos se 
+separan y se almacenan como campos independiente. A los códigos se les
+asigna una descripción para que los objetos, en etapa de debuging,
+puedan ser identificados con facilidad. Por ejemplo, a la profesión 2 se 
+le asigna "academic / teacher", a la edad cuyo código es 24, se le asigna
+una descripción "18-24".
+
+Por último se hacen algunas discretizaciones de datos. A los años en que
+las películas fueron lanzadas se los discretiza según la década de creación
+ (por ejemplo, 1993 $-$$>$ 1900; 2002 $-$$>$ 2000, etc). 
+También se discretizan los rating de calificaciones. Las calificaciones de
+1 y 2 pasan a tener la categoría baja; la de 3 como categoría media; y las
+calificaciones 4 y 5 como categoría alta. 
+
+Todas las transformaciones y discretizaciones utilizadas pueden ser modificadas
+por el usuario según el criterio que crea conveniente. 
+
+
+
 \subsection{Obtención de datos externos}
-TO BE DONE
-TODO: hablar del cache de peliculas
-\subsection{Proceso de automatización}
-TO BE DONE
+Con el objetivo de enriquecer los datos existentes y generar reglas de asociación
+no triviales, se obtienen de 3eras partes datos adicionales.
+
+Por un lado se obtienen los directores y actores de las películas cargadas. Esta informaión se
+obtiene de la base de datos de IMDB\footnote{ver www.imdb.com}. Como cada película puede
+tener más de 1 actor y un director, el software no va a cargar todos, sino los más importantes
+de cada campo. Esta cantidad esta predefinida para que retorne el mejor director y los 
+5 mejores actores. Sin embargo, estos valores pueden ser modificados por el usuario.
+
+Uno de los mayores inconvenientes al obtener datos externos es su latencia. Para obtener
+los actores de IMDB se necesita hacer al menos 2 requests HTML. Uno es para buscar la
+película en base al nombre. Esta consulta devuelve una lista de películas o series con
+las busquedas que más se asemejan al string de entrada. El segundo request es para 
+escoger información específica de la pelicula (actores y directores en este caso), una vez
+que se conoce el código de película según la salida del primer request.
+
+Estos 2 requests pueden llegar a demorar unos 20 a 30 segundos por película. Si el archivo de
+entrada tiene 3950 películas, el proceso demanda aproximadamente 22 hs por corrida.
+
+Este tiempo puede ser modificado, pero la eficiencia de ese proceso esta fuera del alcance del trabajo.
+Lo que si no queda fuera de alcance, es la restricción de que cada vez que el usuario desea
+generar un nuevo set de datos con alguna variación respecto al anterior, éste debe esperar
+22 hs para obtener su salida. Es para evitar este percance que se implemento un cache interno, 
+eficiente y serializado, que almacena los datos de IMDB de las películas ya accedidas previamente.
+Esto significa que cuando se carga una película, el software busca si ya la tiene en su cache,
+ si la tiene, usa esa información. Si no a tiene, la busca en IMDB y la almacena, para que 
+pueda accederse en la iteración siguente. De este modo, las 22 hs de espera se reducen 
+unos milisegundos para cargar la estructura de datos del cache serializado.
+
+Por otro lado, se ha cruzado la información del código postal de cada usuario, para
+obtener la ciudad y el estado de residencia, con intenciones de intear descubir
+si hay asociaciones demográficas.
+
 \subsection{Generación de datasets}
-TO BE DONE
-TODO: Hablar del formato de los datasets (Por transacciones). 
-TODO: Explicar todos los datasets que se generaron
-TODO: Explicar que los datasets se generan dinámicamente
-\subsection{Resumen}
-TO BE DONE
+Durante el desarrollo del trabajo se han generado, en total, mas 20 datasets y 4 GB de datos sin comprimir. 
+Las diferencias radicaban en el formato utilizado, cantidad de datos y atributos. Estas variantes se
+usaron para conocer en profundidad los software que operan con reglas de asociaciones, y
+ver cual era el impacto en tiempo de procesamiento y memorial, al agregarles mas
+datos y atributos.
+También se han probado la performance bajo diferentes formatos de dataset.
+
+\begin{lstlisting}[frame=single,breaklines=true]
+
+# Formato que repite en cada file los campos fijos, pero altera los campos variables 
+
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|3737|male|56-inf|retired|Murfreesboro|TN|4|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|1004|male|56-inf|Artist|San Jose|CA|5|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|550|male|56-inf|executive|NA-citi|NA-state|5|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|5301|male|56-inf|independent|Vega Baja|PR|5|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|5827|male|56-inf|academic / teacher|Saint Paul|MN|4|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|1248|female|56-inf|unemployer|Walnut Creek|CA|2|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|2071|male|56-inf|doctor / health care|Worcester|MA|4|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|1978|male|56-inf|housewife|West Liberty|OH|3|2001
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|4715|male|56-inf|academic / teacher|Portland|OR|5|2000
+1|Toy Story|1995|John Lasseter|8.3|Tom Hanks|Animation|2848|male|56-inf|unknown|Bloomington|IN|5|2000
+
+
+# Formato similar al 1er, pero los datos fijos los escribe en la primer fila
+# y en las filas subsiguientes los escribe como datos faltantes
+tid,name,year,director,actor,genre,uid,sex,ageCat,prefession,citi,state,rating
+1,"Prince of the City","1980","Sidney Lumet",?,?,"2503","male","35-44","independent","New London","PA","low"
+1,?,?,?,"Treat Williams",?,?,?,?,?,?,?,?
+1,?,?,?,"Jerry Orbach",?,?,?,?,?,?,?,?
+1,?,?,?,"Richard Foronjy",?,?,?,?,?,?,?,?
+1,?,?,?,"Don Billett",?,?,?,?,?,?,?,?
+1,?,?,?,"Kenny Marino",?,?,?,?,?,?,?,?
+1,?,?,?,?,"Drama",?,?,?,?,?,?,?
+2,"Prince of the City","1980","Sidney Lumet",?,?,"2857","male","25-34","unknown","Bronx","NY","medium"
+2,?,?,?,"Treat Williams",?,?,?,?,?,?,?,?
+2,?,?,?,"Jerry Orbach",?,?,?,?,?,?,?,?
+2,?,?,?,"Richard Foronjy",?,?,?,?,?,?,?,?
+2,?,?,?,"Don Billett",?,?,?,?,?,?,?,?
+2,?,?,?,"Kenny Marino",?,?,?,?,?,?,?,?
+2,?,?,?,?,"Drama",?,?,?,?,?,?,?
+
+# Formato de transacciones. El primer campo es el transactionID y en el 
+# segundo se tiene el product id.
+tid,pid
+1,"Prince of the City"
+1,"director_Sidney Lumet"
+1,"25-34"
+1,"prof_doctor / health care"
+1,"Columbus"
+1,"OH"
+1,"male"
+1,"high"
+1,"actor_Treat Williams"
+1,"actor_Jerry Orbach"
+1,"actor_Richard Foronjy"
+1,"actor_Don Billett"
+1,"actor_Kenny Marino"
+1,"genre_Drama"
+2,"Prince of the City"
+2,"director_Sidney Lumet"
+2,"50-55"
+2,"prof_other"
+2,"Columbia"
+2,"MO"
+2,"female"
+2,"medium"
+2,"actor_Treat Williams"
+2,"actor_Jerry Orbach"
+2,"actor_Richard Foronjy"
+2,"actor_Don Billett"
+2,"actor_Kenny Marino"
+2,"genre_Drama"
+
+\end{lstlisting}
+
+Es importante remarcar que estos datasets se generan dinámicamente, de forma 
+no supervizada. El usuario solo requiere bajar el software de GitHub, instalar
+las librerías básicas y correr el software, indicando el archivo de configuración
+\footnote{en github se encuentra el archivo de configuración ejemplo usado para este trabajo}. 
+Solamente corriendo el software, se generan todos los datasets mensionados.  En caso de
+querer incorporarse nuevas películas, usuarios o calificaciones, solo es necesarios
+añadirlos al archivo de configuración y correr el pre-procesamiento.
+
 
 
 
@@ -812,13 +1137,59 @@ y la confianza de las reglas son comparables entre si, independientemente de la
 cantidad nominale de datos, ya que estos resultados son porcentuales.
 
 \section{Conclusiones}
-TO BE DONE
+La primera conclusión que se puede obtener es que las reglas de asociaciones requiere
+un trabajo arduo para preparar los datos. No se puede bajar los datos de una base de datos
+y correrlos en Weka o R. Se requiere limpiar datos, agrupar, discretizar y transformar, 
+para generar los datasets deseados. Se debe generar rutinas que permitan generar nuevos
+sets de datos de forma sencilla, cuestión de poder impregnarse en el problema fácilmente.
 
-\section{Posibles mejoras}
-Normalizar las calificaciones POR USUARIO
-Hablar de crear una DB
-Hablar de probar con Neo4J
+La segunda conclusión es que el algoritme de Apriori implementado en la librería Arules
+es eficiente y puede correr más de 800.000 transacciones en custión de segundos. La principal
+latencia de la librería es al cargar los datos, ya que los almacena pre-procesados.
 
-\section*{REFERENCES}
+La 3er conclusión es que no existe una única salida de Apriori. El usuario debe ir variando
+los parámetros y ver las salidas generadas para identificar si hay reglas de asociaciones
+triviales o interesantes. El usuario debe comparar las salidas de varios set de datos para
+llegar a conclusiones que sean relevantes. Existen herramientas de visualización que simplifican
+encontrar los parámetros de Apriori adecuados.
+
+Por último, las reglas de asociaciones realmente ayudan a encontrar asociaciones
+que son dificil de conocer tan solo con explorar la base de datos. Se ve en el trabajo
+como puede encontrarse relaciones entre edad y profesiones, generos relacionados entre si,
+cual es la edad con mayor atracción hacia los romances, y hasta se logra identificar
+que el estado de California como el de Minnesota es un outlayer. Posiblemente, si 
+fondo de inversión quiere construir un complejo de cines, Minnesota podría ser el 
+lugar que sugieren las reglas de asociación.
+
+\section{Posibles mejoras y consideraciones}
+
+Un problema común cuando las personas juzgan, es la dificultad de otorgar una
+calificación justa y uniforme para un mismo objecto. Algunos jueces pueden ser
+mas bondadosos y otros más exigentes. Este inconveniente se ve a la perfección
+en el problema de las películas, ya que más del 50 \% de los votos son positivos
+y menos del 16\% son negativos. El sesgo de los calificadores es sumamente notable.
+Este inconveniente puede salvarse normalizando las calificaciones, hecho que no
+ha sido realizado en este análisis.
+
+Crear estructuras de datos y objetos customs para el pre-procesamiento, puede
+ser una solución adecuada cuando los requerimeintos son claros y poco
+volátiles. El pre-procesamiento de las reglas de asociación es muy dinámico. 
+Muchas veces se realizan corridas de Apriori, se ven algunos inconvenientes,
+y se busca generar nueva información, transformarla o filtrarla. En otras
+palabras, el pre-procesamiento y el procesamiento tienen un alto
+nivel de acoplamiento. Cuando se
+pretende generar nuevos datos, a veces modificar las estructuras de datos 
+internas demanda tiempo o se pierde compatibilidad con versiones anteriores. Es
+por esto que una vez finalizado el análisis, la experiencia muestra a los
+autores que almacenar los datos en una base de datos puede agilizar
+el desarrollo del pre-procesamiento. No tiene que ser una base de datos
+transaccional, concurrente, ni cliente-servidor. Un SQLite3 es suficiente
+para generar estructuras de datos uniformes, accesibles desde el exterior
+y con capacidad para filtrar, transformar y sumarizar información.
+
+A su vez, la base de datos de grafos pueden eficientes para representar
+los datos y sus relaciones. Se considera conveniente hacer un análisis de 
+reglas de asociaciones usando este tipo de motor de bases de datos.
+
 
 \end{document}
