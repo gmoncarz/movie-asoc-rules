@@ -49,7 +49,7 @@
 
 \begin{abstract}
 Trabajo de investigación de Reglas de Asociación con perfil académico. Se desarrollan
-todos los pasos que debe seguirse para la construcción de reglas de asociación
+todos los pasos que deben seguirse para la construcción de reglas de asociación
 y su posterior análisis. Las reglas son procesadas mediante el algoritmo Apriori.
 El trabajo se desarrolla en conjunto con  un ejemplo
 práctico, donde se analizan personas que califican películas. El objetivo es encontrar 
@@ -60,8 +60,8 @@ El procesamiento se ha realizado con los software
 Weka y R, mostrando R un rendimiento
 adecuado para la complejidad computacional del problema.
 
-Finalmente se muestran en detalle todos los patrones encontrados, siendo los más
-relevantes que el estado de California y Minnesota son estados outliers.
+Finalmente se muestran en detalle todos los patrones encontrados, siendo el más 
+relevante que el estado de California y Minnesota son outliers.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -84,7 +84,7 @@ Las reglas de asociación son una herramienta de aprendizaje automático para
 tratar de identificar patrones comunes no triviales en conjuntos de datos
 extensos. La idea general es hacer un análisis exploratorio para  encontrar 
 asociaciones del estilo \{A\} $=$$>$ \{B\}, que significan 
-"si sucede A, entonces sucede B". 
+``si sucede A, entonces sucede B''. 
 
 El trabajo presentado se orienta a hacer un análisis de reglas de asociación con
 fines académicos. Se pretender explorar como funcionan, cuales son  su desempeño y
@@ -97,7 +97,7 @@ El problema a desarrollar esta relacionado con la industria cinematográfica.
 Se tiene información de usuarios que califican películas. Se pretende encontrar
 las preferencias de los usuarios, sus gustos, sus características según su
 posición demográfica y si ha habido algún cambio de tendencia en las valuaciones
-en función del transcurso del tiempo.
+con del transcurso del tiempo.
 
 En la sección de Datos se detalla los datos fuentes, como se los transforma,
 discretiza y preprocesa para generar información útil y cómoda para un análisis
@@ -196,7 +196,7 @@ exploratorio, conocer que tipo de datos son, sus frecuencias y relaciones. Luego
 borrador de los procesos que se debe correr a los datos para generar la información de salida 
 deseada. El mayor inconveniente es que \emph{no siempre se conoce de antemano cuales son las
 salidas ideales a generar}. Es frecuente una vez que se esta haciendo el análisis profundo
-de los datos, creerse conveniente tener los datos en distintos formatos, estructuras de
+de los datos, creer conveniente tener los datos en distintos formatos, estructuras de
 datos u ordenes de los generados. Muchas veces, cambiar estos archivos de salida no 
 es sencillo, o demanda tiempo.
 
@@ -208,7 +208,7 @@ puede implementar diferentes funciones de salida ad-hoc, que determinan cuales s
 las salidas a generar, formatos, ordenes, etc.
 
 Existen ocasiones en los que el usuario encuentra un formato eficiente, pero la cantidad
-de datos generados es mayor a la necesaria, haciendo que el proceso de análisis corra
+de datos generados es mayor a la necesaria, haciendo que el proceso de análisis posterior corra
 mas lento de lo necesario. Por ejemplo, si se quiere analizar géneros de películas y
 estados demográficos, tener un set de datos con actores y profesiones de los calificadores
 es irrelevante, consume más memoria, demanda mas tiempo en procesar datos innecesarios
@@ -218,10 +218,10 @@ Es para solucionar este tipo de inconvenientes que el desarrollo realizado hace 
 procesamiento inicial de los datos, los limpia y transforma tanto como puede, y luego
 deja para el usuario escoger filtros y procesamientos ad-hoc para su salida final.
 
-En caso de que el usuario, durante el análisis de reglas de asociación, crea conveniente
+En caso que el usuario, durante el análisis de reglas de asociación, crea conveniente
 tener un nuevo set de datos con otras características, sólo debe implementar su
 nueva función de salida (generalmente se modifican parámetros de las funciones ya
-existentes) para luego correr el algoritmo y tener la información lista para ser 
+existentes), para luego correr el algoritmo y tener la información lista para ser 
 procesada.
 La lista \ref{code:pre_process_output} muestra uno de los generadores de salida
 usados en el trabajo.
@@ -298,12 +298,12 @@ los integrantes del trabajo en Python, bajo licencia GNU. Se lo puede bajar,
 usar y clonar\footnote{El termino adecuado es fork}. Esta alojado en GitHub, en la 
 dirección https://github.com/gmoncarz/movie-asoc-rules. 
 
-El flujo de trabajo del software a nivel conceptual es:
+El work-flow\footnote{flujo de trabajo en castellano} del software a nivel conceptual es:
 \begin{enumerate}
 \item Leer un archivo de configuración. Este archivo 
 contiene los archivos de entrada y los de salida,
 como también parámetros generales del algoritmo.
-El usuario, si lo desea, puede generar sus parametros custom. De
+El usuario, si lo desea, puede generar sus parámetros custom. De
 esta forma, la configuración del preprocesamiento esta cargada en este
 archivo. El usuario tiene la posibilidad de generarse varios archivos
 de configuración, de acuerdo a las salidas deseadas.
@@ -331,7 +331,7 @@ el software se ejecuta.
 
 \subsection{Discretización y transformación de datos}
 Una vez que las instancias se cargan, se hace una limpieza básica de datos.
-Esta consiste en verificar la existencia de datos, que éstos pertenezcan
+Ésta consiste en verificar la existencia de datos, que éstos pertenezcan
 al dominio de datos (ie. películas no vacías, años luego de 1900 e inferiores
 al año actual, que el sexo de los usuarios sean masculino o femenino, que las
 profesiones estén en el rango definido, etc.)
@@ -339,10 +339,10 @@ profesiones estén en el rango definido, etc.)
 El segundo paso consiste hacer algunas transformaciones de datos. Los nombres
 de películas aparecen junto al año de creación entre paréntesis. Esos campos se 
 separan y se almacenan de forma independiente. A los códigos se les
-asigna una descripción para que los objetos, para que en etapa de debuging estos
-puedan ser identificados con facilidad. Por ejemplo, a la profesión 2 se 
-le asigna "academic / teacher", a la edad cuyo código es 24, se le asigna
-una descripción "18-24".
+asigna una descripción para que los objetos, en etapa de debuging, 
+puedan ser representados e identificados con facilidad. Por ejemplo, a la profesión 2 se 
+le asigna ``academic / teacher'', a la edad cuyo código es 24, se le asigna
+una descripción ``18-24''.
 
 Por último se hacen algunas discretizaciones de datos. A los años en que
 las películas fueron lanzadas se los discretiza según la década de creación
@@ -358,16 +358,16 @@ por el usuario según el criterio que crea conveniente.
 
 \subsection{Obtención de datos externos}
 Con el objetivo de enriquecer los datos existentes y generar reglas de asociación
-no triviales, se obtienen de 3eras partes datos adicionales.
+no triviales, se obtienen de terceras partes datos adicionales.
 
 Por un lado se obtienen los directores y actores de las películas cargadas. Esta información se
 obtiene de la base de datos de IMDB\footnote{ver www.imdb.com}. Como cada película puede
-tener más de 1 actor y un director, el software no va a cargar todos, sino los más importantes
+tener más de un actor y un director, el software no va a cargar todos, sino los más importantes
 de cada campo. Esta cantidad esta predefinida para que retorne el mejor director y los 
 5 mejores actores. Sin embargo, estos valores pueden ser modificados por el usuario.
 
-Uno de los mayores inconvenientes al obtener datos externos es su latencia. Para tener
-los actores de IMDB se necesita hacer al menos hacer 2 requests HTML. Uno es para buscar la
+Uno de los mayores inconvenientes al obtener datos externos es la latencia. Para tener
+los actores de IMDB se necesita hacer al menos 2 requests HTML. Uno es para buscar la
 película en base al nombre. Esta consulta devuelve una lista de películas o series con
 las búsquedas que más se asemejan al string de entrada. El segundo request es para 
 escoger información específica de la película (actores y directores en este caso), una vez
@@ -379,7 +379,7 @@ entrada tiene 3950 películas, el proceso demanda aproximadamente 22 hs por corr
 Este tiempo puede ser mejorado, pero la eficiencia de ese proceso esta fuera del alcance del trabajo.
 Lo que no queda fuera de alcance, es la restricción de que cada vez que el usuario desea
 generar un nuevo set de datos con alguna variación respecto al anterior, éste debe esperar
-22 hs para obtener su nueva salida. Es para evitar este percance que se implemento un cache interno, 
+22 hs para obtener su nueva salida. Es para evitar este percance que se implementa un cache interno, 
 eficiente y serializado, que almacena los datos de IMDB de las películas ya accedidas previamente.
 Esto implica que cuando se carga una película, el software busca si ya la tiene en su cache,
  si la tiene, usa esa información. Si no a tiene, la busca en IMDB y la almacena, para que 
@@ -391,7 +391,7 @@ obtener la ciudad y el estado de residencia, con intenciones de intentar descubr
 si hay asociaciones demográficas.
 
 \subsection{Generación de datasets}
-Durante el desarrollo del trabajo se han generado, en total, mas de 20 datasets y 4 GB de datos descomprimidos. 
+Durante el desarrollo del trabajo se ha generado, en total, mas de 20 datasets y 4 GB de datos descomprimidos. 
 Las diferencias entre estos radican en el formato utilizado, cantidad de datos y atributos. Estas variantes se
 usan para conocer en profundidad los software que operan con reglas de asociaciones, y
 ver cual es el impacto en tiempo de procesamiento y memorial, al agregarles mas
@@ -469,7 +469,8 @@ tid,pid
 Es importante remarcar que estos datasets se generan dinámicamente, de forma 
 no supervisada. El usuario solo requiere bajar el software de GitHub, instalar
 las librerías básicas y correr el software, indicando el archivo de configuración
-\footnote{en github se encuentra el archivo de configuración ejemplo usado para este trabajo}. 
+\footnote{En github se encuentra el archivo de configuración ejemplo usado para este trabajo}
+\footnote{En github también se encuentran los archivos fuentes utilizados para este trabajo}. 
 Solamente corriendo el software, se generan todos los datasets mencionados.  En caso de
 querer incorporarse nuevas películas, usuarios o calificaciones, solo es necesarios
 añadirlos al archivo de configuración y correr el pre-procesamiento.
@@ -487,7 +488,7 @@ En primera instancia, con intenciones de tener una idea general del problema,
 se intenta cargar los set de datos más genéricos creados. Se busca hacer 
 corridas del algoritmo Apriori para explorar
 que reglas genera, que tipos de reglas, la cantidad, como
-también cuales son los valores de soporte y confianza que retorne una cantidad
+también cuales son los valores de soporte y confianza que retorna una cantidad
 de reglas aceptables y útiles. 
 
 \subsection{Weka 3.7.11}
@@ -520,7 +521,7 @@ El segundo punto tiene dos inconvenientes. Por un lado, como ya fue explicado, e
 procesamiento que demanda este formato, ya que toda columna tiene un dato asociado, inclusive el falso. 
 El segundo es que la mayor parte de las reglas de asociación
 generadas, son relacionadas a la no existencia de items, asunto que tiene sentido común, ya que
-el mayor soporte son items falsos, pero que no son objetos de interés. 
+el mayor soporte son items falsos, pero que no son objeto de interés. 
 
 Para resolver este último inconveniente se ejecuta un segundo filtro donde aplica datos faltantes 
 a los registros falsos. De esta forma se tiene una representación precisa del problema. Al intentar 
@@ -538,7 +539,8 @@ A la problemática inicial se le suma obtener resultados en tiempo razonables.
 
 Se procede a realizar el mismo procesamiento de Weka usando R. Se usa el módulo arules. Éste 
 módulo soporta que las entradas tengan un formato de transacciones\footnote{formato donde un 
-campo define el número de transacción y otro campo define el id del producto}
+campo define el número de transacción y otro campo define el id del producto. El formato
+soporta que una transacción sea representada en varias filas.}
 como de basket\footnote{formato donde en una fila se listan todos los productos de la transacción}.
 Durante todo el procesamiento y análisis se usa el formato por transacciones.
 
@@ -637,9 +639,9 @@ high & 58\%
 \end{tabular}
 \end{table}
 
-\subsubsection{Directores mejor rankeados}
+\subsubsection{Directores mejor ranqueados}
 La tabla \ref{table_best_directors} muesta las reglas relativas a los 
-directores de películas mejor rankeados.
+directores de películas mejor ranqueados.
 \begin{table}[ht!]
 \caption{Reglas relativas a directores}
 \label{table_best_directors}
@@ -659,7 +661,7 @@ totales, en 21.000 aparecen Steven Spielberg y de esas 18.900 la calificaron com
 rating \{high\}. Los soportes de la tabla \ref{table_best_directors} 
 son nominalmente significativo. 
 
-\subsubsection{Actores mejor rankeados}
+\subsubsection{Actores mejor ranqueados}
 La tabla \ref{table_best_cast}   muestra las reglas relativas a los actores 
 mejor ranqueados.
 \begin{table}[ht!]
@@ -797,6 +799,7 @@ que tiene el estado respecto del total del país.
 \centering
 \begin{tabular}{l l l}
 estado & \% votos & \%población  \\
+\hline
 California & 18,07 & 11,78 \\
 New York & 7,08 & 6,13 \\
 Minnesota & 6,45 & 1,70 \\
@@ -806,10 +809,10 @@ Texas & 5,23 & 8,36
 \end{table}
 
 Estos resultados muestran, principalmente, que tanto el estado de California
-como el de Minesotta, son outlayers severos. Mientras que la población de
+como el de Minesotta, son outlayers. Mientras que la población de
 Minesota es del 1,70\% de la población de USA, el 6,45\% de los votos pertenecen
 a este estado. El ratio es cercano a 4, lo que demuestra
-que el estado de Minnesota tiene una preferencia de entretenerse viendo películas.
+que el estado de Minnesota tiene una preferencia a entretenerse viendo películas.
 Algo similar sucede con el estado de Californa, donde su población es de casi el
 12\% de los Estados Unidos, pero el 18\% de los votos totales pertenecen a este
 estado. California también es un outlayer, pero este se comprende mas ya que la
@@ -843,12 +846,12 @@ La tabla \ref{citi_votes} muestra las ciudades que más votos realizaron y
 la tabla \ref{citi_high} muestra las reglas de ciudades con mas calificaciones
 positivas. Ambas tablas son consistentes entre si, y también son consistentes
 con el análisis de los estados. Lo que llama la atención es que la ciudad de Los
-Angeles, la 2da ciudad mas  pobladas de los Estados Unidos, 
+Angeles, la 2\sptext{da} ciudad mas  pobladas de los Estados Unidos, 
 ciudad que también pertenece al estado de California, 
 \textbf{no} esta incluida entre las que mas votan\footnote{Los Angeles tiene
 un 1\% de los votos totales}, como tampoco se pudieron generar reglas que 
 incluyan a esta ciudad y a alguna calificación. Esta inexistencia
-de reglas para esta ciudad particular, implicaría una "pseudo-regla" que
+de reglas para esta ciudad particular, implicaría una ``meta-regla'' que
 refleja que a la ciudad de Los Angeles \textbf{no} le gusta ver películas.
  
 \begin{table}[ht!]
@@ -887,6 +890,7 @@ de películas. La tabla \ref{table_genre_state} resume la reglas mas relevantes 
 \centering
 \begin{tabular}{l l l l l }
 nro & regla & sop. & conf. & lift \\
+\hline
 I & \{\} $=$$>$ \{Drama\} & 36\% & 36\% & 1 \\
 II & \{\} $=$$>$ \{Comedy\} & 35\% & 36\% & 1 \\
 III & \{\} $=$$>$ \{Action\} & 26\% & 26\% & 1 \\
@@ -900,10 +904,11 @@ X & \{CA,high\} $=$$>$ \{Comedy\} & 3,53\% & 33\% & 0,94 \\
 \end{tabular}
 \end{table}
 
-La 1ra a 4ta regla muestra que en todo Estados Unidos, 
+La 1\sptext{er} a 4\sptext{ta} regla muestra que en todo Estados Unidos, 
 la gente mira príncipalmente pelícuas de drama y comedia, 
-en 3er medida de acción y en 4ta  Thriller. 
-La 4ta a 8va regla se muestran las asociaciones mas fuertes que del 
+en 3\sptext{er} medida de acción y en 4\sptext{ta}  Thriller\footnote{
+Tener en cuenta que una película puede tener más de 1 género}. 
+La 4\sptext{ta} a 8\sptext{va} regla se muestran las asociaciones mas fuertes que del 
 lado izquierdo pertenece a un estado, y del derecho a un género
 de película. Las 4 reglas tienen un soporte relativamente significativo y
 pertenecen todas al mismo estado: California, estado con mayores votaciones.
@@ -915,7 +920,7 @@ lado izquierdo tiene un estado y una calificación elevada, y el lado derecho
 un género. Los resultados, no por casualidad, coinciden con las películas
 mas vistas en California, como en todo Estados Unidos.
 
-El análisis de la tabla \ref{table_genre_state} nos permite concluir que
+El análisis de la tabla \ref{table_genre_state} permite inducir que
 California es un estado dominante en cuestión de género de peliculas. 
 
 Sería interesante analizar si esta misma posición dominante se repite en el pasado.
@@ -923,7 +928,7 @@ Si llegase a ser así, pero con diferentes géneros, se podría pensar que la in
 cinematográfica de Holliwood sigue los gustos de California, y un cambio en los 
 gustos de ese estado, impactaría en el tipo de películas que Estados Unidos produciría.
 
-La tabla \ref{table_genre_state_high} muestra las reglas de asociación mas fuerte que
+La tabla \ref{table_genre_state_high} muestra las reglas de asociaciones mas fuerte que
 destacan los géneros mejores calificados para cada estado relevante.
 
 \begin{table}[ht!]
@@ -932,6 +937,7 @@ destacan los géneros mejores calificados para cada estado relevante.
 \centering
 \begin{tabular}{l l l l }
 regla & sop. & conf. & lift \\
+\hline
 \{CA,Drama\} $=$$>$ \{high\} & 4,31\% & 64\% & 1,11 \\
 \{CA,Comedy\} $=$$>$ \{high\} & 3,53\% & 56\% & 0,97 \\
 \{Drama,NY\} $=$$>$ \{high\} & 1,79\% & 63\% &  1,13 \\
@@ -1006,7 +1012,7 @@ de la cantidad de votos de cada grupo.
   \pie{90/año 2000, 7/año 2001, 3/$>$$=$2002}
 \end{tikzpicture}
 
-El 2do paso a realizar es hacer algunas corridas exploratorias en cada
+El segundo paso a realizar es hacer algunas corridas exploratorias en cada
 grupo y graficar la nube de puntos con el soporte de arulesViz. 
 
 \begin{figure}[ht!]
@@ -1031,7 +1037,7 @@ en la nube de puntos son muy similares en los 3 grupos.
 
 Al navegar detenidamente la reglas más importantes de los 3 grupos 
 se puede apreciar la semejanza
-entre ellas. La tabla \ref{comparacion} hace un resumen de estas.
+entre ellas. La tabla \ref{comparacion} muestra un resumen de éstas.
 
 \begin{table*}[ht!]
 \caption{Reglas de semejanza de usuarios}
@@ -1044,6 +1050,7 @@ entre ellas. La tabla \ref{comparacion} hace un resumen de estas.
 	\multicolumn{2}{c|}{año 2001} & 
 	\multicolumn{2}{c|}{año 2002} \\
 	     &  & sop & conf & sop & conf & sop & conf \\
+	\hline
 	I    & \{\} $=$$>$ \{male\} & 75\% & 75\% & 74\% & 74\% & 67\% & 67\% \\
 	II   & \{\} $=$$>$ \{female\} & 24\% & 24\% & 26\% & 26\% & 32\% & 32\% \\
 	III  & \{\} $=$$>$ \{Administ.\} & 13\% & 13\% & 17\% & 17\% & 15\% & 15\% \\
@@ -1074,10 +1081,10 @@ votaciones se hacen on-line
 \item Las mujeres están viendo mas películas a partir del año 2002.
 \end{itemize}
 
-Para obtener la 3er regla se solicita a R que devuelva la profesión que más votaciones 
+Para obtener la tercer regla se solicita a R que devuelva la profesión que más votaciones 
 ha realizado en cada set de datos, siendo los administrativos los primeros en todos los casos.
 Dado que hay más de 20 profesiones, en caso de haber independencia de los gustos sobre profesiones, 
-el valor esperado sería del 5\%, pero los administrativos tienen valore comprendidos entre el
+el valor esperado sería del 5\%, pero los administrativos tienen un valor comprendidos entre el
 13 y 17\%, lo que comprueba que los administrativos son los más afines a entretenerse mirando
 películas.
 
@@ -1103,7 +1110,7 @@ momento los usuarios tienden a calificar positivamente las películas y muestran
 rechazo por asignar calificaciones bajas. Las calificaciones positivas son 
 constantemente más del doble de las mediocres y más del triple las negativas.
 Sin  embargo, con el tiempo se va observando que el espectador se vuelve un
-poco más exigente, ya que en el año 2000 los votos positivos eran un 58\%, en
+poco más exigente, ya que en el año 2000 los votos positivos son un 58\%, en
 2001 un 55\% y desde el 2002 un 53\%.
 
 Para generar la regla X se solicita el actor mejor calificado en cada dataset.
@@ -1122,7 +1129,7 @@ de soporte y confianza parejo en todo momento. Esto podría inducir que,
 por cuestiones psicológicas, los jovenes de 25 a 34 años son los más 
 románticos.
 
-Para generar la regla XIV Se le pide al software que devuelva cual es la profesión
+Para generar la regla XIV se le pide al software que devuelva cual es la profesión
 más generosa al calificar películas. Los administrativos son lideres en este
 aspecto con el correr del tiempo.
 
@@ -1140,7 +1147,7 @@ es el género mas visto por las mujeres en cada momento.
 year & regla & sop. & conf. \\
 2000 & \{Romance\} $=$$>$ \{female\} & 5,22\% & 33\%  \\
 2001 & \{Comedy\} $=$$>$ \{female\} & 10,12\% & 27\%  \\
-$>$$=$ 2002 & \{Romance\} $=$$>$ \{female\} & 6,33\% & 41\%  \\
+$\geq 2002$ & \{Romance\} $=$$>$ \{female\} & 6,33\% & 41\%  \\
 \end{tabular}
 \end{table}
 
@@ -1150,7 +1157,7 @@ en 2001 y desde 2002, el soporte de \{Romance\} $=$$>$ \{female\} es de entre
 un 5 y 6\%, pero en 2001, la regla \{Comedy\} $=$$>$ \{female\} es de un 10\%.
 
 Previo a finalizar esta sección, debe recordarse y tenerse en cuenta que 
- el 90\% de los datos que están en el dataset son del año 2000, quedando solo un 6\%
+ el 90\% de los datos que están en el dataset son del año 2000, quedando solo un 7\%
 para el año 2001 y un 3\% para los años posteriores. Pese a que un  3\% 
 no es un porcentaje significante, son 24.000 votaciones, número no despreciable.
 Como se analizaron cada rango de tiempo en dataset independientes, el soporte
@@ -1170,7 +1177,7 @@ La segunda conclusión es que el algoritmo de Apriori implementado en la librer�
 es eficiente y puede correr más de 800.000 transacciones en cuestión de segundos. La principal
 latencia de la librería es al cargar los datos, ya que los almacena pre-procesados.
 
-La 3er conclusión es que no existe una única salida de Apriori, como si existe una única
+La tercera conclusión es que no existe una única salida de Apriori, como si existe una única
 regresión lineal. El usuario debe ir variando
 los parámetros y ver las salidas generadas para identificar si hay reglas de asociaciones
 triviales o interesantes. El usuario debe comparar las salidas de varios set de datos para
@@ -1179,7 +1186,7 @@ encontrar los parámetros de Apriori adecuados.
 
 Por último, las reglas de asociaciones dan soporte para encontrar asociaciones
 que son difícil de conocer tan solo con explorar la base de datos. Estas asociaciones tienen
-que ser del tipo "si sucede X, entonces sucede Y". Se ve en el trabajo
+que ser del tipo ``si sucede X, entonces sucede Y''. Se ve en el trabajo
 como puede encontrarse relaciones entre edad y profesiones, géneros relacionados entre si,
 cual es la edad con mayor atracción hacia los romances, y hasta se logra identificar
 que el estado de California como el de Minnesota son outlayer. Esta información puede
