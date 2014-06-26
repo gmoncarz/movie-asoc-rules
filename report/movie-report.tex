@@ -158,7 +158,7 @@ sobre pelícuas y rating de películas. Los archivos en cuestión son 3:
 
 	\item Rating: rating de distintos usuarios sobre diversas películas.\footnote{Se
 		destaca que cada usuario emite la calificación sobre las películas que él desea. El
-		usuario no esta obligado a completar una cantidad mínima de calificaciones.}
+		usuario no está obligado a completar una cantidad mínima de calificaciones.}
 
 		\begin{itemize}
 			\item Usuario que realiza la evaluación
@@ -195,7 +195,7 @@ Lo primero que se hace es conocer los datos de forma general, hacer un análisis
 exploratorio, conocer que tipo de datos son, sus frecuencias y relaciones. Luego se realiza un
 borrador de los procesos que se debe correr a los datos para generar la información de salida 
 deseada. El mayor inconveniente es que \emph{no siempre se conoce de antemano cuales son las
-salidas ideales a generar}. Es frecuente una vez que se esta haciendo el análisis profundo
+salidas ideales a generar}. Es frecuente una vez que se está haciendo el análisis profundo
 de los datos, creer conveniente tener los datos en distintos formatos, estructuras de
 datos u ordenes de los generados. Muchas veces, cambiar estos archivos de salida no 
 es sencillo, o demanda tiempo.
@@ -295,10 +295,10 @@ def writeTransActorsDirectors(filename, moviesDict, usersDict, ranking="high",
 \subsection{Software de automatizacion}
 El desarrollo para la automatización de preprocesamiento es realizado por 
 los integrantes del trabajo en Python, bajo licencia GNU. Se lo puede bajar,
-usar y clonar\footnote{El termino adecuado es fork}. Esta alojado en GitHub, en la 
+usar y clonar\footnote{El término adecuado es fork}. Esta alojado en GitHub, en la 
 dirección https://github.com/gmoncarz/movie-asoc-rules. 
 
-El work-flow\footnote{flujo de trabajo en castellano} del software a nivel conceptual es:
+El work-flow\footnote{Flujo de trabajo en castellano} del software a nivel conceptual es:
 \begin{enumerate}
 \item Leer un archivo de configuración. Este archivo 
 contiene los archivos de entrada y los de salida,
@@ -361,7 +361,7 @@ Con el objetivo de enriquecer los datos existentes y generar reglas de asociaci�
 no triviales, se obtienen de terceras partes datos adicionales.
 
 Por un lado se obtienen los directores y actores de las películas cargadas. Esta información se
-obtiene de la base de datos de IMDB\footnote{ver www.imdb.com}. Como cada película puede
+obtiene de la base de datos de IMDB\footnote{Ver www.imdb.com}. Como cada película puede
 tener más de un actor y un director, el software no va a cargar todos, sino los más importantes
 de cada campo. Esta cantidad esta predefinida para que retorne el mejor director y los 
 5 mejores actores. Sin embargo, estos valores pueden ser modificados por el usuario.
@@ -494,7 +494,7 @@ de reglas aceptables y útiles.
 \subsection{Weka 3.7.11}
 Se intenta hacer el análisis de reglas de asociaciones con Weka. Este sofware por defecto
 no lee archivos de transacciones, donde una transacción puede ser representada en varias filas,
- sino que usa el formato donde todas las variables estan definidas en una fila. Para convertir
+ sino que usa el formato donde todas las variables están definidas en una fila. Para convertir
 de un formato a otro, se utiliza el filtro 
 Denormalize\footnote{http://weka.sourceforge.net/packageMetaData/denormalize/index.html}
 \footnote{El filtro Denormalize requiere la versión de Weka 3.7.2. Este es el motivo por el que 
@@ -538,10 +538,10 @@ motivo por el que se decide intentar con otro software.
 A la problemática inicial se le suma obtener resultados en tiempo razonables. 
 
 Se procede a realizar el mismo procesamiento de Weka usando R. Se usa el módulo arules. Éste 
-módulo soporta que las entradas tengan un formato de transacciones\footnote{formato donde un 
+módulo soporta que las entradas tengan un formato de transacciones\footnote{Formato donde un 
 campo define el número de transacción y otro campo define el id del producto. El formato
 soporta que una transacción sea representada en varias filas.}
-como de basket\footnote{formato donde en una fila se listan todos los productos de la transacción}.
+como de basket\footnote{Formato donde en una fila se listan todos los productos de la transacción}.
 Durante todo el procesamiento y análisis se usa el formato por transacciones.
 
 R muestra ser eficiente a la hora de generar reglas de asociaciones. R demora 130 segundos para
@@ -555,7 +555,7 @@ dataset mas grande utilizado durante el trabajo de investigación. Éste tiene
 	\item contenido: información de películas, usuarios, actores, directores, etc.
 \end{itemize}
 
-En primer termino genera desconfianza  que los tiempos de ejecución de Apriori en R 
+En primer término genera desconfianza  que los tiempos de ejecución de Apriori en R 
 sean tan rápidos,
 más aún al contrastarlos con Weka. 
 El motivo es porque arules maneja eficientemente la matriz esparza de transacciones y
@@ -599,7 +599,7 @@ estan recién cercanas al 0,5\%
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=90mm]{arulesviz.png}
-\caption{Gráfico de dispersion de reglas generadas}
+\caption{Gráfico de dispersión de reglas generadas}
 \label{arulesviz}
 \end{figure}
 
@@ -813,7 +813,7 @@ como el de Minesotta, son outlayers. Mientras que la población de
 Minesota es del 1,70\% de la población de USA, el 6,45\% de los votos pertenecen
 a este estado. El ratio es cercano a 4, lo que demuestra
 que el estado de Minnesota tiene una preferencia a entretenerse viendo películas.
-Algo similar sucede con el estado de Californa, donde su población es de casi el
+Algo similar sucede con el estado de California, donde su población es de casi el
 12\% de los Estados Unidos, pero el 18\% de los votos totales pertenecen a este
 estado. California también es un outlayer, pero este se comprende mas ya que la
 mayor industria cinematográfica de Estados Unidos es Hollywood, que se encuentra
@@ -1168,7 +1168,7 @@ cantidad nominale de datos, ya que estos resultados son porcentuales.
 La primera conclusión que se puede obtener es que las reglas de asociaciones requiere
 un trabajo arduo para preparar los datos. No se puede bajar los datos de una base de datos
 y correrlos en Weka o R, como puede hacerse en un análisis de componentes 
-principales,de correspondencia, de clasificación o de clustering. Se requiere limpiar 
+principales, de correspondencia, de clasificación o de clustering. Se requiere limpiar 
 datos, agrupar, discretizar y transformar, 
 para generar los datasets deseados. Se debe generar rutinas que permitan generar nuevos
 sets de datos de forma sencilla, cuestión de poder impregnarse en el problema fácilmente.
