@@ -24,9 +24,9 @@ laptop:
     fileLike11: movies_actors_directors_ranking.csv
     fileLike12: movies_directors_genre_ranking.csv
     fileLike13: movies_directors_ranking.csv
-    fileLike2000: movies_actors_directors_2000.csv
-    fileLike2001: movies_actors_directors_2001.csv
-    fileLike2002: movies_actors_directors_2002.csv
+    fileLike2000: full_2000.csv
+    fileLike2001: full_2001.csv
+    fileLike2002: full_2002.csv
 
     fileDirectors: directors.csv
     fileActors: actors.csv

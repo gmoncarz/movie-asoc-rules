@@ -975,6 +975,57 @@ def writeOnlyActorsDirectors(filename, moviesDict, usersDict, ranking=None,
 
 
 
+def alejo(filename, moviesDict, usersDict, ranking="high", 
+  writeGenre=False, ratingYear=None):
+    """Write a transaction file ready to be process by R.
+
+    The file will write """
+    CSV_CHAR = ','
+    # Open the File
+    try:
+        fh = open(filename, 'w')
+    except:
+        return None
+
+    # Write the header
+    header = ['tid', 'pid']
+    line = CSV_CHAR.join(header)
+    fh.write(line.encode('utf-8'))
+    fh.write('\n')
+    
+    transid = 0
+    for movie in moviesDict.values():
+        if movie.rating and movie.imdbRating:
+            cast = map((lambda x: "actor_" + x), movie.cast) if movie.cast else ['?']
+            genres = movie.genre if movie.genre else ['?']
+            
+            if movie.director:
+                fixedMovie = [movie.name, "director_" + movie.director ]
+            else:
+                fixedMovie = [movie.name]
+            
+            for rating in movie.rating:
+                if ranking == None or rating.ratingCat == ranking:
+                    currentRatingYear = int(datetime.datetime.fromtimestamp(int(rating.timestamp)).strftime('%Y'))
+                    if ratingYear==None or currentRatingYear in ratingYear:
+                        transid += 1
+                        user = usersDict[rating.userid]
+                        fixedUser = [user.ageCat, "prof_" + user.profession, user.citi, user.state, user.sex]
+                        fixedRating = [ rating.ratingCat ]
+     
+                        lst = fixedMovie[:]
+                        lst.extend(fixedUser)
+                        if ranking == None:
+                            lst.extend(fixedRating)
+                        lst.extend(cast)
+                        if writeGenre:
+                            lst.extend(map((lambda x: "genre_" + x), genres))
+                        lst = map(unicode, lst)
+                        for item in lst:
+                            fh.write(('%d,"%s"\n' %(transid, item)).encode('utf-8'))
+
+    fh.close()
+
 
 
 
@@ -1100,7 +1151,14 @@ def main():
 #      ranking=["high", "low"], actors=False, directors=True )
 #    writeOnlyActorsDirectors(outputActors, moviesDict, usersDict, 
 #      ranking=["high", "low"], actors=True, directors=False )
-   
+#    writeTransActorsDirectors(outputFileLike2002, moviesDict, usersDict, 
+#      ranking=None, writeGenre=False, ratingYear=range(2002,2015))
+    alejo(outputFileLike2000, moviesDict, usersDict,
+        ranking=None, writeGenre=True, ratingYear=(2000,))
+    alejo(outputFileLike2001, moviesDict, usersDict,
+        ranking=None, writeGenre=True, ratingYear=(2001,))
+    alejo(outputFileLike2002, moviesDict, usersDict,
+        ranking=None, writeGenre=True, ratingYear=range(2002,2015))
 
     return 0
 
